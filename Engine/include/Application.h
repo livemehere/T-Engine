@@ -1,0 +1,30 @@
+#pragma once
+
+#include "EngineCommon.h"
+#include "Layer.h"
+#include "Window.h"
+
+namespace Engine {
+    struct AppSpec {
+        WindowSpec windowSpec;
+    };
+
+    class Application {
+    public:
+        Application(const AppSpec& spec);
+        ~Application();
+
+        void Run() const;
+
+        static Application& Get() { return *s_instance; }
+
+    private:
+        static Application* s_instance;
+
+        std::unique_ptr<Window> m_window;
+        std::vector<std::unique_ptr<Layer>> m_layerStack;
+
+
+        static void ErrorCallback(int error, const char *description);
+    };
+}

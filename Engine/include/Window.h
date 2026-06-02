@@ -2,39 +2,41 @@
 
 #include "EngineCommon.h"
 
-struct WindowSpec {
-    std::string title;
-    int width;
-    int height;
-    bool vsync = true;
-};
+namespace Engine {
+    struct WindowSpec {
+        std::string title;
+        int width;
+        int height;
+        bool vsync = true;
+    };
 
-class Window {
-public:
-    Window(const WindowSpec& spec);
-     ~Window();
+    class Window {
+    public:
+        Window(const WindowSpec& spec);
+         ~Window();
 
-    int GetWidth() const { return width; }
-    int GetHeight() const { return height; }
-    int GetFrameBufferWidth() const { return frameBufferWidth; }
-    int GetFrameBufferHeight() const { return frameBufferHeight; }
-    GLFWwindow* GetHandle() const { return window; }
+        std::string GetTitle() const { return m_title;};
+        int GetWidth() const { return m_width; }
+        int GetHeight() const { return m_height; }
+        int GetFrameBufferWidth() const { return m_frameBufferWidth; }
+        int GetFrameBufferHeight() const { return m_frameBufferHeight; }
+        GLFWwindow* GetHandle() const { return window; }
 
-    bool ShouldClose() const { return glfwWindowShouldClose(window); }
-    static void BeforeUpdate() { glfwPollEvents();}
-    void OnUpdate() const;
+        bool ShouldClose() const { return glfwWindowShouldClose(window); }
+        void Update() const;
 
-private:
-    std::string title;
-    int width;
-    int height;
-    int frameBufferWidth;
-    int frameBufferHeight;
-    bool vsync = true;
+    private:
+        std::string m_title;
+        int m_width;
+        int m_height;
+        int m_frameBufferWidth;
+        int m_frameBufferHeight;
+        bool m_vsync = true;
 
-    GLFWwindow* window = nullptr;
+        GLFWwindow* window = nullptr;
 
-    static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
-    static void ErrorCallback(int error, const char* description);
-    static void LogOpenGLInfo();
-};
+        static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
+        static void ErrorCallback(int error, const char* description);
+        static void LogOpenGLInfo();
+    };
+}
