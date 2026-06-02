@@ -11,6 +11,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <stdexcept>
 
 
 #define LOG_TRACE(...)    spdlog::trace(__VA_ARGS__)

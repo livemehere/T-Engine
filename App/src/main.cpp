@@ -12,18 +12,22 @@ class DummyLayer : public Engine::Layer {
 };
 
 int main() {
+    try {
+        Engine::AppSpec appSpec{
+            .windowSpec = {
+                .title = "Sample Window",
+                .width = 1920,
+                .height = 1080
+            }
+        };
 
-    Engine::AppSpec appSpec{
-        .windowSpec = {
-            .title = "Sample Window",
-            .width = 1920,
-            .height = 1080
-        }
-    };
+        Engine::Application app{appSpec};
+        app.PushLayer<DummyLayer>();
+        app.Run();
 
-    Engine::Application app{appSpec};
-    app.PushLayer<DummyLayer>();
-    app.Run();
-
-    return 0;
+        return 0;
+    } catch (const std::exception& e) {
+        LOG_CRITICAL("Application crashed: {}", e.what());
+        return 1;
+    }
 }
