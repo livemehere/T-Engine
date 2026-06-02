@@ -1,6 +1,6 @@
-#include "Core.h"
+#include "EngineCommon.h"
 
 int main() {
-    Core::hello();
+    Engine::hello();
     return 0;
 }

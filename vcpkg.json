@@ -1,0 +1,8 @@
+{
+  "name": "t-engine",
+  "version": "0.0.1",
+  "dependencies": [
+    "glfw3",
+    "glad"
+  ]
+}
