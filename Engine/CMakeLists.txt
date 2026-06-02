@@ -8,6 +8,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glad REQUIRED)
+find_package(spdlog REQUIRED)
 
 add_library(Engine STATIC ${SOURCES})
 
@@ -17,6 +18,7 @@ target_link_libraries(Engine PUBLIC
         OpenGL::GL
         glfw
         glad::glad
+        spdlog::spdlog_header_only
 )
 
 target_precompile_headers(Engine PRIVATE include/EngineCommon.h)
