@@ -13,12 +13,14 @@ struct WindowSpec {
 class Window {
 public:
     Window(const WindowSpec& spec);
-    ~Window() = default;
+     ~Window();
 
     int GetWidth() const { return width; }
     int GetHeight() const { return height; }
     int GetFrameBufferWidth() const { return frameBufferWidth; }
     int GetFrameBufferHeight() const { return frameBufferHeight; }
+    GLFWwindow* GetNativeWindow() const { return window; }
+
 private:
     std::string title;
     int width;

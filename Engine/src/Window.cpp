@@ -41,30 +41,11 @@ Window::Window(const WindowSpec& spec) {
     glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
     glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallback);
     glfwSwapInterval(vsync ? 1 : 0);
+}
 
-    while (!glfwWindowShouldClose(window)) {
-        // running
-        glfwPollEvents();
-
-        // FPS 계산
-        static double lastTime = glfwGetTime();
-        static int frameCount = 0;
-
-        double currentTime = glfwGetTime();
-        frameCount++;
-
-        if (currentTime - lastTime >= 1.0) {  // 1초마다 출력
-            LOG_INFO("FPS: {}", frameCount);
-            frameCount = 0;
-            lastTime = currentTime;
-        }
-
-        glfwSwapBuffers(window);
-
-    }
+Window::~Window() {
     glfwDestroyWindow(window);
     glfwTerminate();
-    exit(0);
 }
 
 void Window::FrameBufferSizeCallback(GLFWwindow *window, int width, int height) {
