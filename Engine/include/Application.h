@@ -14,9 +14,15 @@ namespace Engine {
         Application(const AppSpec& spec);
         ~Application();
 
-        void Run() const;
+        void Run();
 
-        static Application& Get() { return *s_instance; }
+        static Application& Get() {
+            if (s_instance == nullptr) {
+                throw std::runtime_error("Application instance is not available");
+            }
+
+            return *s_instance;
+        }
         Window* GetWindow() const { return m_window.get();}
 
         template<typename TLayer, typename ... Args>

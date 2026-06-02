@@ -1,37 +1,49 @@
 #include "Application.h"
 
+#include <stdexcept>
+
 namespace Engine {
     Application* Application::s_instance = nullptr;
 
     Application::Application(const AppSpec &spec) {
 
         if (s_instance != nullptr) {
-            LOG_ERROR("Can not instantiate Application more than one");
-            exit(1);
+            throw std::runtime_error("Cannot instantiate Application more than once");
         }
 
-        if (!glfwInit()) {
-            LOG_ERROR("Fail to init GLFW");
-            exit(1);
-        }
         glfwSetErrorCallback(ErrorCallback);
-        m_window = std::make_unique<Window>(spec.windowSpec);
+
+        if (!glfwInit()) {
+            throw std::runtime_error("Failed to initialize GLFW");
+        }
+
         s_instance = this;
+
+        try {
+            m_window = std::make_unique<Window>(spec.windowSpec);
+        } catch (...) {
+            s_instance = nullptr;
+            glfwTerminate();
+            throw;
+        }
     }
 
     Application::~Application() {
+        m_layerStack.clear();
+        m_window.reset();
         s_instance = nullptr;
+        glfwTerminate();
     }
 
-    void Application::Run() const {
+    void Application::Run() {
 
-        float lastTime = static_cast<float>(glfwGetTime());
+        double lastTime = glfwGetTime();
 
         while (!m_window->ShouldClose()) {
             glfwPollEvents();
 
-            const float time = static_cast<float>(glfwGetTime());
-            const float dt = time - lastTime;
+            const double time = glfwGetTime();
+            const float dt = static_cast<float>(time - lastTime);
             lastTime = time;
 
             for (auto& layer : m_layerStack) {
@@ -52,6 +64,6 @@ namespace Engine {
 
 
     void Application::ErrorCallback(int error, const char *description) {
-        LOG_ERROR("GLFW ERROR : {}", description);
+        LOG_ERROR("GLFW ERROR {}: {}", error, description);
     }
 }
