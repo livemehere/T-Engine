@@ -9,7 +9,6 @@ struct WindowSpec {
     bool vsync = true;
 };
 
-
 class Window {
 public:
     Window(const WindowSpec& spec);
@@ -19,9 +18,10 @@ public:
     int GetHeight() const { return height; }
     int GetFrameBufferWidth() const { return frameBufferWidth; }
     int GetFrameBufferHeight() const { return frameBufferHeight; }
-    GLFWwindow* GetNativeWindow() const { return window; }
+    GLFWwindow* GetHandle() const { return window; }
 
     bool ShouldClose() const { return glfwWindowShouldClose(window); }
+    static void BeforeUpdate() { glfwPollEvents();}
     void OnUpdate() const;
 
 private:

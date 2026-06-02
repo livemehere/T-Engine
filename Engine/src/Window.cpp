@@ -49,7 +49,6 @@ Window::~Window() {
 }
 
 void Window::OnUpdate() const {
-    glfwPollEvents();
     glfwSwapBuffers(window);
 }
 
