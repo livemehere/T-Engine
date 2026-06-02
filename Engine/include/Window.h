@@ -21,6 +21,9 @@ public:
     int GetFrameBufferHeight() const { return frameBufferHeight; }
     GLFWwindow* GetNativeWindow() const { return window; }
 
+    bool ShouldClose() const { return glfwWindowShouldClose(window); }
+    void OnUpdate() const;
+
 private:
     std::string title;
     int width;

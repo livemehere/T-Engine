@@ -48,6 +48,11 @@ Window::~Window() {
     glfwTerminate();
 }
 
+void Window::OnUpdate() const {
+    glfwPollEvents();
+    glfwSwapBuffers(window);
+}
+
 void Window::FrameBufferSizeCallback(GLFWwindow *window, int width, int height) {
     const auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
     glViewport(0,0,width,height);
