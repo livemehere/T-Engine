@@ -18,3 +18,5 @@ target_link_libraries(Engine PUBLIC
         glfw
         glad::glad
 )
+
+target_precompile_headers(Engine PRIVATE include/EngineCommon.h)
