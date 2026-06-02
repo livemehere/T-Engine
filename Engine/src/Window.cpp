@@ -1,5 +1,6 @@
 #include "Window.h"
 
+
 namespace Engine {
     Window::Window(const WindowSpec& spec) {
         m_title = spec.title;
@@ -11,20 +12,22 @@ namespace Engine {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+// #ifdef __APPLE__
+//         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+// #endif
+
         window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
 
         if (!window) {
-            glfwTerminate();
-            LOG_ERROR("Fail to create window");
-            exit(1);
+            throw std::runtime_error("Failed to create window");
         }
 
         glfwMakeContextCurrent(window);
 
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-            glfwTerminate();
-            LOG_ERROR("Fail to load GLAD");
-            exit(1);
+            glfwDestroyWindow(window);
+            window = nullptr;
+            throw std::runtime_error("Failed to load GLAD");
         }
 
         LogOpenGLInfo();
@@ -38,8 +41,10 @@ namespace Engine {
     }
 
     Window::~Window() {
-        glfwDestroyWindow(window);
-        glfwTerminate();
+        if (window != nullptr) {
+            glfwDestroyWindow(window);
+            window = nullptr;
+        }
     }
 
     void Window::Update() const {
