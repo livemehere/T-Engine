@@ -1,7 +1,5 @@
 #pragma once
 
-#include "EngineCommon.h"
-
 namespace Engine {
     class Layer {
     public:

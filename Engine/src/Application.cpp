@@ -25,12 +25,12 @@ namespace Engine {
 
     void Application::Run() const {
 
-        float lastTime = glfwGetTime();
+        float lastTime = static_cast<float>(glfwGetTime());
 
         while (!m_window->ShouldClose()) {
             glfwPollEvents();
 
-            const float time = glfwGetTime();
+            const float time = static_cast<float>(glfwGetTime());
             const float dt = time - lastTime;
             lastTime = time;
 
