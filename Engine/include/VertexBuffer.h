@@ -57,7 +57,7 @@ namespace Engine {
         void CalcOffsetAndStrid() {
             unsigned int offset = 0;
             m_stride = 0;
-            for (auto& element : m_elements) {
+            for (const auto& element : m_elements) {
                 element.offset = offset;
                 offset+= element.size;
                 m_stride += element.size;
@@ -76,7 +76,7 @@ namespace Engine {
         const BufferLayout& GetLayout() const { return m_layout; }
         void SetLayout(const BufferLayout& layout) { m_layout = layout; }
     private:
-        unsigned int id;
+        unsigned int id = 0;
         BufferLayout m_layout;
     };
 }
