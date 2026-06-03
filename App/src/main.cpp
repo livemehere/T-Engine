@@ -8,7 +8,7 @@ public:
     DummyLayer() {
 
         // vertex shader
-        std::string vsSrc = R"(#version 330 core
+        std::string vsSrc = R"(#version 410 core
         layout (location = 0) in vec3 aPos;
         layout (location = 1) in vec4 aColor;
 
@@ -33,11 +33,11 @@ public:
         if(!success)
         {
             glGetShaderInfoLog(vs, 512, nullptr, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+            LOG_ERROR("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n {}", infoLog);
         }
 
         // fragment shader
-        std::string fsSrc = R"(#version 330 core
+        std::string fsSrc = R"(#version 410 core
         out vec4 FragColor;
         in vec4 vColor;
 
@@ -59,7 +59,7 @@ public:
         if(!success2)
         {
             glGetShaderInfoLog(fs, 512, nullptr, infoLog2);
-            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog2 << std::endl;
+            LOG_ERROR("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n {}", infoLog2);
         }
 
         int success3;
@@ -74,7 +74,7 @@ public:
 
         if(!success3) {
             glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog3);
-            std::cout << "ERROR::SHADER::SHADER_PROGRAM::COMPILATION_FAILED\n" << infoLog3 << std::endl;
+            LOG_ERROR("ERROR::SHADER::SHADER_PROGRAM::COMPILATION_FAILED\n {}", infoLog3);
         }
         glDeleteShader(vs);
         glDeleteShader(fs);
@@ -91,7 +91,6 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
-
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
 
@@ -102,9 +101,6 @@ public:
         // rgba
         glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3*sizeof(float)));
         glEnableVertexAttribArray(1);
-
-        LOG_INFO("CREATED!");
-
     }
 
     void OnUpdate(float dt) override {
