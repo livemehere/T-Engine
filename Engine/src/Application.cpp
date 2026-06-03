@@ -35,7 +35,7 @@ namespace Engine {
         glfwTerminate();
     }
 
-    void Application::Run() {
+    void Application::Run() const {
 
         double lastTime = glfwGetTime();
 
@@ -46,22 +46,18 @@ namespace Engine {
             const float dt = static_cast<float>(time - lastTime);
             lastTime = time;
 
-            for (auto& layer : m_layerStack) {
+            for (const auto& layer : m_layerStack) {
                 layer->OnUpdate(dt);
             }
 
             // NOTE: can be elsewhere like thread
-            for (auto& layer : m_layerStack) {
+            for (const auto& layer : m_layerStack) {
                 layer->OnRender();
             }
 
             m_window->Update();
         }
-
     }
-
-
-
 
     void Application::ErrorCallback(int error, const char *description) {
         LOG_ERROR("GLFW ERROR {}: {}", error, description);
