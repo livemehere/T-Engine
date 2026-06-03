@@ -21,10 +21,6 @@ namespace Engine {
         Texture(unsigned char *rawData, int w, int h, int ch);
         ~Texture();
 
-        Texture(const Texture&) = delete;
-        Texture& operator=(const Texture&) = delete;
-        Texture(Texture &&) noexcept;
-        Texture& operator=(Texture&&) noexcept;
 
         static const Texture& GetWhiteTexture();
 

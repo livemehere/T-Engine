@@ -5,7 +5,7 @@
 #include "Window.h"
 
 static std::vector<unsigned int> indices = {
-    0,1,2,
+    0,2,1,
     1,2,3
 };
 
@@ -20,16 +20,15 @@ static std::vector<float> vertices = {
 class DummyLayer : public Engine::Layer {
     unsigned int shaderProgram;
     GLuint VAO;
-    bool wireFrame = false;
-    Engine::Texture texture{"../../../assets/noir.png"};
-    // Texture texture = Texture::GetWhiteTexture();
+    bool wireFrame = true;
+    // Engine::Texture texture{"../../../assets/noir.png"};
+    Engine::Texture texture = Engine::Texture::GetWhiteTexture();
 
     std::shared_ptr<Engine::IndexBuffer> indexBuffer;
     std::shared_ptr<Engine::VertexBuffer> vertexBuffer;
-
-
 public:
     DummyLayer() {
+
         // vertex shader
         std::string vsSrc = R"(#version 410 core
         layout (location = 0) in vec3 aPos;
@@ -147,7 +146,7 @@ public:
     }
 
     void OnRender() override {
-        glPolygonMode(GL_FRONT,wireFrame ? GL_LINE : GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
         texture.Bind();
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
