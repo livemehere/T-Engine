@@ -18,6 +18,14 @@ Texture::Texture(unsigned char *rawData, int w, int h, int ch) : id(0), data(raw
     UploadTexture();
 }
 
+Texture::~Texture() {
+    if (id != 0) {
+        glDeleteTextures(1, &id);
+        LOG_INFO("[Texture] VRAM data free (id: {})", id);
+        id = 0;
+    }
+}
+
 const Texture & Texture::GetWhiteTexture() {
     static unsigned char whitePixel[] = { 255, 255, 255, 255 };
     static Texture whiteTexture{whitePixel, 1,1,4};
@@ -37,6 +45,8 @@ void Texture::UploadTexture() {
     glGenTextures(1,&id);
     glBindTexture(GL_TEXTURE_2D, id);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

@@ -2,6 +2,13 @@
 
 #include "EngineCommon.h"
 
+/**
+ * ⚠️ TODO: must managed by like 'AssetManager' with caching.
+ * 1. Load data at RAM from file
+ * 2. Upload data to V-RAM and delete RAM data
+ * 3. Hold GPU Texture ID
+ * 4. Delete V-RAM resource on destructor
+ */
 class Texture {
 public:
     unsigned int id;
@@ -11,7 +18,13 @@ public:
 
     Texture(const std::string& filepath);
     Texture(unsigned char *rawData, int w, int h, int ch);
-    ~Texture() = default;
+    ~Texture();
+
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
+    Texture(Texture &&) noexcept;
+    Texture& operator=(Texture&&) noexcept;
+
     static const Texture& GetWhiteTexture();
 
     void Bind(unsigned int slot = 0) const;

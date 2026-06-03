@@ -9,6 +9,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glad REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(glm REQUIRED)
 
 add_library(Engine STATIC ${SOURCES})
 
@@ -19,6 +20,7 @@ target_link_libraries(Engine PUBLIC
         glfw
         glad::glad
         spdlog::spdlog_header_only
+        glm::glm
 )
 
 target_precompile_headers(Engine PRIVATE include/EngineCommon.h)

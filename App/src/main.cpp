@@ -12,10 +12,6 @@ class DummyLayer : public Engine::Layer {
 
 public:
     DummyLayer() {
-
-
-
-
         // vertex shader
         std::string vsSrc = R"(#version 410 core
         layout (location = 0) in vec3 aPos;
@@ -97,10 +93,10 @@ public:
         // xyz + rgba
         std::vector<float> vertices = {
             // xyz                    // rgba                      // UV
-            -0.5f, 0.5f, 0.0f,        1.0f, 0.0f, 0.0f, 1.0f,      0.0f, 1.0f, // TL
-            0.5f, 0.5f, 0.0f,         1.0f, 1.0f, 0.0f, 1.0f,      1.0f, 1.0f, // TR
-            -0.5f, -0.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f,      0.0f, 0.0f, // BL
-            0.5f, -0.5f, 0.0f,        0.0f, 0.0f, 1.0f, 1.0f,      1.0f, 0.0f, // BR
+            -0.5f, 0.5f, 0.0f,        1.0f, 1.0f, 1.0f, 1.0f,      0.0f, 1.0f, // TL
+            0.5f, 0.5f, 0.0f,         1.0f, 1.0f, 1.0f, 1.0f,      1.0f, 1.0f, // TR
+            -0.5f, -0.5f, 0.0f,       1.0f, 1.0f, 1.0f, 1.0f,      0.0f, 0.0f, // BL
+            0.5f, -0.5f, 0.0f,        1.0f, 1.0f, 1.0f, 1.0f,      1.0f, 0.0f, // BR
         };
         int stride = 9;
 
@@ -144,7 +140,7 @@ public:
     }
 
     void OnRender() override {
-        glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
+        glPolygonMode(GL_FRONT,wireFrame ? GL_LINE : GL_FILL);
         texture.Bind();
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
