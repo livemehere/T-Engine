@@ -20,10 +20,10 @@ static std::vector<float> vertices = {
 class DummyLayer : public Engine::Layer {
     unsigned int shaderProgram;
     GLuint VAO;
-    bool wireFrame = true;
-    // Engine::Texture texture{"../../../assets/noir.png"};
-    Engine::Texture texture = Engine::Texture::GetWhiteTexture();
+    bool wireFrame = false;
 
+    // std::unique_ptr<Engine::Texture> texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
+    std::shared_ptr<Engine::Texture> texture = Engine::Texture::GetWhiteTexture();
     std::shared_ptr<Engine::IndexBuffer> indexBuffer;
     std::shared_ptr<Engine::VertexBuffer> vertexBuffer;
 public:
@@ -147,7 +147,7 @@ public:
 
     void OnRender() override {
         glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
-        texture.Bind();
+        texture->Bind();
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES,indexBuffer->Getcount(), GL_UNSIGNED_INT, 0);
