@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Texture.h"
 #include "Window.h"
 
 class DummyLayer : public Engine::Layer {
@@ -6,9 +7,13 @@ class DummyLayer : public Engine::Layer {
     GLuint VAO;
     bool wireFrame = false;
     int indicesSize = 0;
+    Texture texture{"../../../assets/noir.png"};
+    // Texture texture = Texture::GetWhiteTexture();
 
 public:
     DummyLayer() {
+
+
 
 
         // vertex shader
@@ -133,15 +138,6 @@ public:
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(7*sizeof(float)));
         glEnableVertexAttribArray(2);
 
-        // Texture
-        unsigned char whitePixel[] = { 255, 255, 255, 255 };
-        GLuint whiteTexture;
-        glGenTextures(1,&whiteTexture);
-        glBindTexture(GL_TEXTURE_2D, whiteTexture);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1,1,0,GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
     }
 
     void OnUpdate(float dt) override {
@@ -149,6 +145,7 @@ public:
 
     void OnRender() override {
         glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
+        texture.Bind();
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES,indicesSize, GL_UNSIGNED_INT, 0);
