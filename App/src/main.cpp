@@ -4,20 +4,27 @@
 class DummyLayer : public Engine::Layer {
     unsigned int shaderProgram;
     GLuint VAO;
+    bool wireFrame = false;
+    int indicesSize = 0;
+
 public:
     DummyLayer() {
+
 
         // vertex shader
         std::string vsSrc = R"(#version 410 core
         layout (location = 0) in vec3 aPos;
         layout (location = 1) in vec4 aColor;
+        layout (location = 2) in vec2 aTexCoord;
 
         out vec4 vColor;
+        out vec2 vTexCoord;
 
         void main()
         {
-            gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+            gl_Position = vec4(aPos, 1.0);
             vColor = aColor;
+            vTexCoord = aTexCoord;
         })";
         const char* vsSrcPtr = vsSrc.c_str();
 
@@ -40,10 +47,13 @@ public:
         std::string fsSrc = R"(#version 410 core
         out vec4 FragColor;
         in vec4 vColor;
+        in vec2 vTexCoord;
+
+        uniform sampler2D uTexture;
 
         void main()
         {
-            FragColor = vColor;
+            FragColor = texture(uTexture, vTexCoord) * vColor;
         })";
         const char* fsSrcPtr = fsSrc.c_str();
 
@@ -81,14 +91,19 @@ public:
 
         // xyz + rgba
         std::vector<float> vertices = {
-            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top / r
-            -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,// left / g
-            0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f// right / b
+            // xyz                    // rgba                      // UV
+            -0.5f, 0.5f, 0.0f,        1.0f, 0.0f, 0.0f, 1.0f,      0.0f, 1.0f, // TL
+            0.5f, 0.5f, 0.0f,         1.0f, 1.0f, 0.0f, 1.0f,      1.0f, 1.0f, // TR
+            -0.5f, -0.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f,      0.0f, 0.0f, // BL
+            0.5f, -0.5f, 0.0f,        0.0f, 0.0f, 1.0f, 1.0f,      1.0f, 0.0f, // BR
         };
+        int stride = 9;
 
         std::vector<unsigned int> indices = {
-            0,1,2
+            0,1,2,
+            1,2,3
         };
+        indicesSize = indices.size();
 
         // VAO
         glGenVertexArrays(1, &VAO);
@@ -107,25 +122,36 @@ public:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
         // xyz
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
 
         // rgba
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3*sizeof(float)));
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(3*sizeof(float)));
         glEnableVertexAttribArray(1);
 
+        // UV
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(7*sizeof(float)));
+        glEnableVertexAttribArray(2);
 
+        // Texture
+        unsigned char whitePixel[] = { 255, 255, 255, 255 };
+        GLuint whiteTexture;
+        glGenTextures(1,&whiteTexture);
+        glBindTexture(GL_TEXTURE_2D, whiteTexture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1,1,0,GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
     }
 
     void OnUpdate(float dt) override {
     }
 
     void OnRender() override {
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES,3, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES,indicesSize, GL_UNSIGNED_INT, 0);
     }
 };
 
