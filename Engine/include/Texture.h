@@ -9,28 +9,30 @@
  * 3. Hold GPU Texture ID
  * 4. Delete V-RAM resource on destructor
  */
-class Texture {
-public:
-    unsigned int id;
-    int width;
-    int height;
-    int channels;
+namespace Engine {
+    class Texture {
+    public:
+        unsigned int id;
+        int width;
+        int height;
+        int channels;
 
-    Texture(const std::string& filepath);
-    Texture(unsigned char *rawData, int w, int h, int ch);
-    ~Texture();
+        Texture(const std::string& filepath);
+        Texture(unsigned char *rawData, int w, int h, int ch);
+        ~Texture();
 
-    Texture(const Texture&) = delete;
-    Texture& operator=(const Texture&) = delete;
-    Texture(Texture &&) noexcept;
-    Texture& operator=(Texture&&) noexcept;
+        Texture(const Texture&) = delete;
+        Texture& operator=(const Texture&) = delete;
+        Texture(Texture &&) noexcept;
+        Texture& operator=(Texture&&) noexcept;
 
-    static const Texture& GetWhiteTexture();
+        static const Texture& GetWhiteTexture();
 
-    void Bind(unsigned int slot = 0) const;
-    void UnBind() const;
+        void Bind(unsigned int slot = 0) const;
+        void UnBind() const;
 
-private:
-    unsigned char* data = nullptr;
-    void UploadTexture();
-};
+    private:
+        unsigned char* data = nullptr;
+        void UploadTexture();
+    };
+}
