@@ -18,7 +18,7 @@ namespace Engine {
 
     private:
         unsigned int id;
-        // 이건왜 배열로 되어있을까.
+        // split VBO for dynamic update buffers
         std::vector<std::shared_ptr<VertexBuffer>> m_vertexBuffers;
         std::shared_ptr<IndexBuffer> m_indexBuffer;
     };
