@@ -22,8 +22,8 @@ class DummyLayer : public Engine::Layer {
     GLuint VAO;
     bool wireFrame = false;
 
-    // std::unique_ptr<Engine::Texture> texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
-    std::shared_ptr<Engine::Texture> texture = Engine::Texture::GetWhiteTexture();
+    std::unique_ptr<Engine::Texture> texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
+    // std::shared_ptr<Engine::Texture> texture = Engine::Texture::GetWhiteTexture();
     std::shared_ptr<Engine::IndexBuffer> indexBuffer;
     std::shared_ptr<Engine::VertexBuffer> vertexBuffer;
 public:
@@ -120,6 +120,10 @@ public:
         });
         vertexBuffer->Bind();
 
+        // EBO
+        indexBuffer = std::make_shared<Engine::IndexBuffer>(indices.data(),static_cast<unsigned int>(indices.size()));
+        indexBuffer->Bind();
+
         const auto layout = vertexBuffer->GetLayout();
         unsigned int index = 0;
         for (auto& element : layout.GetElements()) {
@@ -133,13 +137,6 @@ public:
                 reinterpret_cast<void *>(element.offset));
             index++;
         }
-
-        indexBuffer = std::make_shared<Engine::IndexBuffer>(
-            indices.data(),
-            static_cast<unsigned int>(indices.size())
-        );
-        indexBuffer->Bind();
-
     }
 
     void OnUpdate(float dt) override {
