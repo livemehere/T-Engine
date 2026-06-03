@@ -1,14 +1,32 @@
 #include "Application.h"
+ #include "IndexBuffer.h"
 #include "Texture.h"
+#include "VertexBuffer.h"
 #include "Window.h"
+
+static std::vector<unsigned int> indices = {
+    0,1,2,
+    1,2,3
+};
+
+static std::vector<float> vertices = {
+    // xyz                    // rgba                      // UV
+    -0.5f, 0.5f, 0.0f,        1.0f, 1.0f, 1.0f, 1.0f,      0.0f, 1.0f, // TL
+    0.5f, 0.5f, 0.0f,         1.0f, 1.0f, 1.0f, 1.0f,      1.0f, 1.0f, // TR
+    -0.5f, -0.5f, 0.0f,       1.0f, 1.0f, 1.0f, 1.0f,      0.0f, 0.0f, // BL
+    0.5f, -0.5f, 0.0f,        1.0f, 1.0f, 1.0f, 1.0f,      1.0f, 0.0f, // BR
+};
 
 class DummyLayer : public Engine::Layer {
     unsigned int shaderProgram;
     GLuint VAO;
     bool wireFrame = false;
-    int indicesSize = 0;
-    Texture texture{"../../../assets/noir.png"};
+    Engine::Texture texture{"../../../assets/noir.png"};
     // Texture texture = Texture::GetWhiteTexture();
+
+    std::shared_ptr<Engine::IndexBuffer> indexBuffer;
+    std::shared_ptr<Engine::VertexBuffer> vertexBuffer;
+
 
 public:
     DummyLayer() {
@@ -90,49 +108,38 @@ public:
         glDeleteShader(vs);
         glDeleteShader(fs);
 
-        // xyz + rgba
-        std::vector<float> vertices = {
-            // xyz                    // rgba                      // UV
-            -0.5f, 0.5f, 0.0f,        1.0f, 1.0f, 1.0f, 1.0f,      0.0f, 1.0f, // TL
-            0.5f, 0.5f, 0.0f,         1.0f, 1.0f, 1.0f, 1.0f,      1.0f, 1.0f, // TR
-            -0.5f, -0.5f, 0.0f,       1.0f, 1.0f, 1.0f, 1.0f,      0.0f, 0.0f, // BL
-            0.5f, -0.5f, 0.0f,        1.0f, 1.0f, 1.0f, 1.0f,      1.0f, 0.0f, // BR
-        };
-        int stride = 9;
-
-        std::vector<unsigned int> indices = {
-            0,1,2,
-            1,2,3
-        };
-        indicesSize = indices.size();
-
         // VAO
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
 
         // VBO
-        GLuint VBO;
-        glGenBuffers(1, &VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+        vertexBuffer = std::make_shared<Engine::VertexBuffer>(vertices.data(), sizeof(float) * vertices.size());
+        vertexBuffer->SetLayout({
+            {Engine::ShaderDataType::Float3, "aPosition"},
+            {Engine::ShaderDataType::Float4, "aColor"},
+            {Engine::ShaderDataType::Float2, "aTexCoord"},
+        });
+        vertexBuffer->Bind();
 
-        // EBO
-        GLuint EBO;
-        glGenBuffers(1, &EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW);
+        const auto layout = vertexBuffer->GetLayout();
+        unsigned int index = 0;
+        for (auto& element : layout.GetElements()) {
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(
+                index,
+                element.GetComponentCount(),
+                GL_FLOAT,
+                element.normalized ? GL_TRUE : GL_FALSE,
+                layout.GetStride(),
+                reinterpret_cast<void *>(element.offset));
+            index++;
+        }
 
-        // xyz
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // rgba
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(3*sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        // UV
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(7*sizeof(float)));
-        glEnableVertexAttribArray(2);
+        indexBuffer = std::make_shared<Engine::IndexBuffer>(
+            indices.data(),
+            static_cast<unsigned int>(indices.size())
+        );
+        indexBuffer->Bind();
 
     }
 
@@ -144,7 +151,7 @@ public:
         texture.Bind();
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES,indicesSize, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES,indexBuffer->Getcount(), GL_UNSIGNED_INT, 0);
     }
 };
 
