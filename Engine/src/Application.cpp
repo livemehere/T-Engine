@@ -40,6 +40,7 @@ namespace Engine {
         double lastTime = glfwGetTime();
 
         while (!m_window->ShouldClose()) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glfwPollEvents();
 
             const double time = glfwGetTime();
