@@ -12,17 +12,16 @@
 namespace Engine {
     class Texture {
     public:
-        unsigned int id;
-        int width;
-        int height;
-        int channels;
+        unsigned int id = 0;
+        int width = 0;
+        int height = 0;
+        int channels = 0;
 
         Texture(const std::string& filepath);
         Texture(unsigned char *rawData, int w, int h, int ch);
         ~Texture();
 
-
-        static const Texture& GetWhiteTexture();
+        static std::shared_ptr<Texture> GetWhiteTexture();
 
         void Bind(unsigned int slot = 0) const;
         void UnBind() const;

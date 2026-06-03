@@ -3,10 +3,12 @@
 
 namespace Engine {
     Texture::Texture(const std::string &filepath) {
+        LOG_INFO("[Texture] ctor from file {}", filepath);
         stbi_set_flip_vertically_on_load(true);
         data = stbi_load(filepath.c_str(),&width, &height,&channels, STBI_rgb_alpha);
         if (!data) {
             LOG_ERROR("[Texture] image load failed {}", filepath);
+            // TODO: how to handle, exit process? or throw runtime error or fallback whiteTexture?
             return;
         }
         LOG_INFO("[Texture] image loaded {}x{} (channels: {})", width, height, channels);
@@ -16,10 +18,12 @@ namespace Engine {
     }
 
     Texture::Texture(unsigned char *rawData, int w, int h, int ch) : id(0), data(rawData), width(w), height(h), channels(ch) {
+        LOG_INFO("[Texture] ctor from raw data {}x{} (channels: {})", width, height, channels);
         UploadTexture();
     }
 
     Texture::~Texture() {
+        LOG_INFO("[Texture] dtor (id: {})", id);
         if (id != 0) {
             glDeleteTextures(1, &id);
             LOG_INFO("[Texture] VRAM data free (id: {})", id);
@@ -27,9 +31,9 @@ namespace Engine {
         }
     }
 
-    const Texture & Texture::GetWhiteTexture() {
+    std::shared_ptr<Texture> Texture::GetWhiteTexture() {
         static unsigned char whitePixel[] = { 255, 255, 255, 255 };
-        static Texture whiteTexture{whitePixel, 1,1,4};
+        static auto whiteTexture = std::make_shared<Texture>(whitePixel, 1,1,4);
         return whiteTexture;
     }
 
