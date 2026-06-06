@@ -15,7 +15,7 @@ namespace Engine {
             case ShaderDataType::Float3: return sizeof(float) * 3;
             case ShaderDataType::Float4: return sizeof(float) * 4;
         }
-        return 0;
+        throw std::runtime_error("Invalid ShaderDataType");
     }
 
     struct BufferElement {
@@ -38,7 +38,7 @@ namespace Engine {
                 case ShaderDataType::Float3: return 3;
                 case ShaderDataType::Float4: return 4;
             }
-            return 0;
+            throw std::runtime_error("Invalid ShaderDataType");
         }
     };
 

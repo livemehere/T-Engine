@@ -3,6 +3,10 @@
 
 namespace Engine {
     Window::Window(const WindowSpec& spec) {
+        if (spec.width <= 0 || spec.height <= 0) {
+            throw std::runtime_error("Window dimensions must be greater than zero");
+        }
+
         m_title = spec.title;
         m_width = spec.width;
         m_height = spec.height;
@@ -66,6 +70,10 @@ namespace Engine {
         const char* glslVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
         const char* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
         const char* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+
+        if (glVersion == nullptr || glslVersion == nullptr || renderer == nullptr || vendor == nullptr) {
+            throw std::runtime_error("Failed to query OpenGL driver information");
+        }
 
         LOG_INFO("OpenGL Version: {}", glVersion);
         LOG_INFO("GLSL Version: {}", glslVersion);

@@ -17,6 +17,14 @@ namespace Engine {
 
     Texture::Texture(unsigned char *rawData, int w, int h, int ch)
         : m_id(0), m_width(w), m_height(h), m_channels(ch), m_data(rawData) {
+        if (m_data == nullptr) {
+            throw std::runtime_error("[Texture] raw texture data cannot be null");
+        }
+
+        if (m_width <= 0 || m_height <= 0) {
+            throw std::runtime_error("[Texture] texture dimensions must be greater than zero");
+        }
+
         LOG_INFO("[Texture] ctor from raw data {}x{} (channels: {})", m_width, m_height, m_channels);
         UploadTexture();
     }
@@ -50,7 +58,15 @@ namespace Engine {
             throw std::runtime_error("[Texture] cannot upload null texture data");
         }
 
+        if (m_width <= 0 || m_height <= 0) {
+            throw std::runtime_error("[Texture] cannot upload texture with invalid dimensions");
+        }
+
         glGenTextures(1, &m_id);
+        if (m_id == 0) {
+            throw std::runtime_error("[Texture] failed to create texture object");
+        }
+
         glBindTexture(GL_TEXTURE_2D, m_id);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);

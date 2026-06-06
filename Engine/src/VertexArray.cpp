@@ -3,6 +3,9 @@
 namespace Engine {
     VertexArray::VertexArray() {
         glGenVertexArrays(1, &m_id);
+        if (m_id == 0) {
+            throw std::runtime_error("Failed to create VertexArray");
+        }
         glBindVertexArray(m_id);
     }
 
@@ -11,6 +14,10 @@ namespace Engine {
     }
 
     void VertexArray::Bind() const {
+        if (m_indexBuffer == nullptr) {
+            throw std::runtime_error("VertexArray requires an IndexBuffer before binding");
+        }
+
         glBindVertexArray(m_id);
         for (const auto& vb : m_vertexBuffers) {
             vb->Bind();
@@ -19,6 +26,10 @@ namespace Engine {
     }
 
     void VertexArray::UnBind() const {
+        if (m_indexBuffer == nullptr) {
+            throw std::runtime_error("VertexArray requires an IndexBuffer before unbinding");
+        }
+
         for (const auto& vb : m_vertexBuffers) {
             vb->UnBind();
         }
@@ -27,6 +38,10 @@ namespace Engine {
     }
 
     void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer> &vertexBuffer) {
+        if (vertexBuffer == nullptr) {
+            throw std::runtime_error("Cannot add null VertexBuffer");
+        }
+
         if (vertexBuffer->GetLayout().GetElements().empty()) {
             throw std::runtime_error("VertexBuffer has empty elements");
         }
@@ -56,6 +71,10 @@ namespace Engine {
     }
 
     void VertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexBuffer) {
+        if (indexBuffer == nullptr) {
+            throw std::runtime_error("Cannot set null IndexBuffer");
+        }
+
         glBindVertexArray(m_id);
         indexBuffer->Bind();
 

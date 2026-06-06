@@ -2,7 +2,19 @@
 
 namespace Engine {
     VertexBuffer::VertexBuffer(const float *vertices, unsigned int size) {
+        if (vertices == nullptr) {
+            throw std::runtime_error("VertexBuffer data cannot be null");
+        }
+
+        if (size == 0) {
+            throw std::runtime_error("VertexBuffer size must be greater than zero");
+        }
+
         glGenBuffers(1, &m_id);
+        if (m_id == 0) {
+            throw std::runtime_error("Failed to create VertexBuffer");
+        }
+
         glBindBuffer(GL_ARRAY_BUFFER, m_id);
         glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
         LOG_INFO("[VertexBuffer] ctor (id: {}, size: {}bytes)", m_id, size);

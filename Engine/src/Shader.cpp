@@ -43,6 +43,10 @@ namespace Engine {
         const char* sourcePtr = source.c_str();
 
         unsigned int shader = glCreateShader(type);
+        if (shader == 0) {
+            throw std::runtime_error("[Shader] Failed to create " + typeStr + " shader object");
+        }
+
         glShaderSource(shader, 1, &sourcePtr, nullptr);
         glCompileShader(shader);
 
@@ -67,6 +71,11 @@ namespace Engine {
         char infoLog[512];
 
         m_id = glCreateProgram();
+        if (m_id == 0) {
+            glDeleteShader(vs);
+            glDeleteShader(fs);
+            throw std::runtime_error("[Shader] Failed to create shader program");
+        }
 
         glAttachShader(m_id, vs);
         glAttachShader(m_id, fs);
