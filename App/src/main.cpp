@@ -6,6 +6,9 @@
 #include "Shader.h"
 #include "Window.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 static std::vector<unsigned int> indices = {
     0,2,1,
     1,2,3
@@ -22,13 +25,14 @@ static std::vector<float> vertices = {
 class DummyLayer : public Engine::Layer {
     bool wireFrame = false;
 
-    std::unique_ptr<Engine::Texture> texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
-    // std::shared_ptr<Engine::Texture> texture = Engine::Texture::GetWhiteTexture();
-
+    std::unique_ptr<Engine::Texture> texture;;
     std::shared_ptr<Engine::VertexArray> vertexArray;
     std::shared_ptr<Engine::Shader> shader;
 public:
     DummyLayer() {
+
+        texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
+        // texture = Engine::Texture::GetWhiteTexture();
 
         shader = std::make_shared<Engine::Shader>("../../../assets/shaders/Texture.vert","../../../assets/shaders/Texture.frag");
 
@@ -48,16 +52,42 @@ public:
         auto indexBuffer = std::make_shared<Engine::IndexBuffer>(indices.data(),static_cast<unsigned int>(indices.size()));
         vertexArray->SetIndexBuffer(indexBuffer);
 
-
+        glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
     }
 
     void OnUpdate(float dt) override {
     }
 
     void OnRender() override {
-        glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
         shader->Bind();
         texture->Bind(0);
+
+        // projection
+        auto window = Engine::Application::Get().GetWindow();
+        float width = static_cast<float>(window->GetWidth());
+        float height = static_cast<float>(window->GetHeight());
+        // (0,0) is left-bottom, (width,height) is top-right
+        glm::mat4 projection = glm::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
+
+        // camera
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 viewProjection = projection * view;
+
+        int vpLoc = glGetUniformLocation(shader->GetId(), "uViewProjection");
+        glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
+
+        // transform
+        glm::vec3 position(width/3, height/3, 0.0f);
+        glm::vec2 size(800.0f, 600.0f);
+        float rotationDeg = 0.0f;
+
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) // position (x,y)
+        * glm::rotate(glm::mat4(1.0f),glm::radians(rotationDeg),glm::vec3(0.0f, 0.0f, 1.0f)) // rotation
+        * glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 1.0f)); // scale
+
+        int transformLoc = glGetUniformLocation(shader->GetId(), "uTransform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
         vertexArray->Bind();
         glDrawElements(GL_TRIANGLES,vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
     }
