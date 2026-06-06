@@ -1,6 +1,7 @@
 #include "Application.h"
  #include "IndexBuffer.h"
 #include "Texture.h"
+#include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "Window.h"
 
@@ -24,6 +25,9 @@ class DummyLayer : public Engine::Layer {
 
     std::unique_ptr<Engine::Texture> texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
     // std::shared_ptr<Engine::Texture> texture = Engine::Texture::GetWhiteTexture();
+
+
+    std::shared_ptr<Engine::VertexArray> vertexArray;
     std::shared_ptr<Engine::IndexBuffer> indexBuffer;
     std::shared_ptr<Engine::VertexBuffer> vertexBuffer;
 public:
@@ -108,8 +112,7 @@ public:
         glDeleteShader(fs);
 
         // VAO
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
+        vertexArray = std::make_shared<Engine::VertexArray>();
 
         // VBO
         vertexBuffer = std::make_shared<Engine::VertexBuffer>(vertices.data(), sizeof(float) * vertices.size());
@@ -118,25 +121,13 @@ public:
             {Engine::ShaderDataType::Float4, "aColor"},
             {Engine::ShaderDataType::Float2, "aTexCoord"},
         });
-        vertexBuffer->Bind();
+        vertexArray->AddVertexBuffer(vertexBuffer);
 
         // EBO
         indexBuffer = std::make_shared<Engine::IndexBuffer>(indices.data(),static_cast<unsigned int>(indices.size()));
-        indexBuffer->Bind();
+        vertexArray->SetIndexBuffer(indexBuffer);
 
-        const auto layout = vertexBuffer->GetLayout();
-        unsigned int index = 0;
-        for (auto& element : layout.GetElements()) {
-            glEnableVertexAttribArray(index);
-            glVertexAttribPointer(
-                index,
-                element.GetComponentCount(),
-                GL_FLOAT,
-                element.normalized ? GL_TRUE : GL_FALSE,
-                layout.GetStride(),
-                reinterpret_cast<void *>(element.offset));
-            index++;
-        }
+
     }
 
     void OnUpdate(float dt) override {
@@ -144,10 +135,10 @@ public:
 
     void OnRender() override {
         glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
-        texture->Bind();
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES,indexBuffer->Getcount(), GL_UNSIGNED_INT, 0);
+        texture->Bind(0);
+        vertexArray->Bind();
+        glDrawElements(GL_TRIANGLES,vertexArray->GetIndexBuffer()->Getcount(), GL_UNSIGNED_INT, 0);
     }
 };
 

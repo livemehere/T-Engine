@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineCommon.h"
+
 namespace Engine {
 
     enum class ShaderDataType {

@@ -16,6 +16,9 @@ namespace Engine {
         void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer); // 이건왜 & 로받는가?
         void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer);
 
+        const std::shared_ptr<IndexBuffer>& GetIndexBuffer() { return m_indexBuffer; }
+        const std::vector<std::shared_ptr<VertexBuffer>>& GetVertexBuffers() { return m_vertexBuffers; }
+
     private:
         unsigned int id;
         // split VBO for dynamic update buffers
