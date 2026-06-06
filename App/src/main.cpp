@@ -77,13 +77,23 @@ public:
         glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
 
         // transform
+
+
+
         glm::vec3 position(width/3, height/3, 0.0f);
-        glm::vec2 size(800.0f, 600.0f);
-        float rotationDeg = 0.0f;
+        static glm::vec2 scale(800.0f, 600.0f);
+        static float rotationDeg = 0.0f;
+        rotationDeg+= 0.1f;
+        // scale.x += 10.0f;
+
+        // pivot
+        glm::vec2 pivot(0.5f, 0.5f);
+        glm::vec3 pivotOffset = glm::vec3((0.5f - pivot.x) * scale.x, (0.5f - pivot.y) * scale.y, 0.0f);
 
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) // position (x,y)
         * glm::rotate(glm::mat4(1.0f),glm::radians(rotationDeg),glm::vec3(0.0f, 0.0f, 1.0f)) // rotation
-        * glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 1.0f)); // scale
+        * glm::translate(glm::mat4(1.0f), pivotOffset)
+        * glm::scale(glm::mat4(1.0f), glm::vec3(scale.x, scale.y, 1.0f)); // scale
 
         int transformLoc = glGetUniformLocation(shader->GetId(), "uTransform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
