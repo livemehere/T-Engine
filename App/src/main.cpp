@@ -66,9 +66,10 @@ public:
         shader->Bind();
         texture->Bind(0);
 
+        camera->SetZoom(camera->GetZoom() + 0.01f);
+
         int vpLoc = glGetUniformLocation(shader->GetId(), "uViewProjection");
         glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(camera->GetViewProjectionMatrix()));
-
 
         auto window = Engine::Application::Get().GetWindow();
         float width = static_cast<float>(window->GetWidth());

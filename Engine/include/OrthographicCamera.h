@@ -6,16 +6,26 @@
 namespace Engine {
     class OrthographicCamera {
     public:
-        OrthographicCamera(float left, float right, float bottom, float top): m_projectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 1.0f)), m_viewMatrix(1.0f) {
-            m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
+        OrthographicCamera(float left, float right, float bottom, float top): m_BoundsLeft(left), m_BoundsRight(right), m_BoundsBottom(bottom), m_BoundsTop(top), m_viewMatrix(1.0f) {
+            RecalculateProjectionMatrix();
         }
         ~OrthographicCamera() = default;
 
         void SetProjection(float left, float right, float bottom, float top){
-            m_projectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
-            m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
+            m_BoundsLeft = left;
+            m_BoundsRight = right;
+            m_BoundsBottom = bottom;
+            m_BoundsTop = top;
+            RecalculateProjectionMatrix();
         }
 
+        float GetZoom() const { return m_zoom;}
+        void SetZoom(float zoom) {
+            m_zoom = zoom;
+            RecalculateProjectionMatrix();
+        }
+
+        // transform
         const glm::vec3& GetPosition() const { return m_position;}
         void SetPosition(const glm::vec3& position){
             m_position = position;
@@ -39,11 +49,27 @@ namespace Engine {
             m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
         }
 
+        void RecalculateProjectionMatrix() {
+            m_projectionMatrix = glm::ortho(
+                m_BoundsLeft * m_zoom,
+                m_BoundsRight * m_zoom,
+                m_BoundsBottom * m_zoom,
+                m_BoundsTop * m_zoom,
+                -1.0f,
+                1.0f
+            );
+
+            m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
+        }
+
         glm::mat4 m_projectionMatrix;
         glm::mat4 m_viewMatrix;
         glm::mat4 m_viewProjectionMatrix;
 
         glm::vec3 m_position = {0.0f, 0.0f, 0.0f};
         float m_rotation = 0.0f;
+
+        float m_BoundsLeft, m_BoundsRight, m_BoundsBottom, m_BoundsTop;
+        float m_zoom = 1.0f;
     };
 }
