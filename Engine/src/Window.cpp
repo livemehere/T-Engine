@@ -37,6 +37,7 @@ namespace Engine {
 
         // for device pixel ratio
         glfwGetFramebufferSize(window, &m_frameBufferWidth, &m_frameBufferHeight);
+        glViewport(0, 0, m_frameBufferWidth, m_frameBufferHeight);
         glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallback);
         glfwSwapInterval(m_vsync ? 1 : 0);
     }
