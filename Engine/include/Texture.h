@@ -12,22 +12,26 @@
 namespace Engine {
     class Texture {
     public:
-        unsigned int id = 0;
-        int width = 0;
-        int height = 0;
-        int channels = 0;
-
         Texture(const std::string& filepath);
         Texture(unsigned char *rawData, int w, int h, int ch);
         ~Texture();
 
         static std::shared_ptr<Texture> GetWhiteTexture();
 
+        unsigned int GetId() const { return m_id; }
+        int GetWidth() const { return m_width; }
+        int GetHeight() const { return m_height; }
+        int GetChannels() const { return m_channels; }
+
         void Bind(unsigned int slot = 0) const;
         void UnBind() const;
 
     private:
-        unsigned char* data = nullptr;
+        unsigned int m_id = 0;
+        int m_width = 0;
+        int m_height = 0;
+        int m_channels = 0;
+        unsigned char* m_data = nullptr;
         void UploadTexture();
     };
 }
