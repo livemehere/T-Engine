@@ -1,13 +1,11 @@
 #include "Application.h"
 #include "IndexBuffer.h"
+#include "OrthographicCamera.h"
 #include "Texture.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "Shader.h"
 #include "Window.h"
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 static std::vector<unsigned int> indices = {
     0,2,1,
@@ -25,11 +23,17 @@ static std::vector<float> vertices = {
 class DummyLayer : public Engine::Layer {
     bool wireFrame = false;
 
+    std::unique_ptr<Engine::OrthographicCamera> camera;
     std::unique_ptr<Engine::Texture> texture;;
     std::shared_ptr<Engine::VertexArray> vertexArray;
     std::shared_ptr<Engine::Shader> shader;
 public:
     DummyLayer() {
+
+        auto window = Engine::Application::Get().GetWindow();
+        float width = static_cast<float>(window->GetWidth());
+        float height = static_cast<float>(window->GetHeight());
+        camera = std::make_unique<Engine::OrthographicCamera>(0.0f, width, 0.0f, height);
 
         texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
         // texture = Engine::Texture::GetWhiteTexture();
@@ -62,25 +66,16 @@ public:
         shader->Bind();
         texture->Bind(0);
 
-        // projection
+        int vpLoc = glGetUniformLocation(shader->GetId(), "uViewProjection");
+        glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(camera->GetViewProjectionMatrix()));
+
+
         auto window = Engine::Application::Get().GetWindow();
         float width = static_cast<float>(window->GetWidth());
         float height = static_cast<float>(window->GetHeight());
-        // (0,0) is left-bottom, (width,height) is top-right
-        glm::mat4 projection = glm::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
-
-        // camera
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 viewProjection = projection * view;
-
-        int vpLoc = glGetUniformLocation(shader->GetId(), "uViewProjection");
-        glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
 
         // transform
-
-
-
-        glm::vec3 position(width/3, height/3, 0.0f);
+        glm::vec3 position(width/2, height/2, 0.0f);
         static glm::vec2 scale(800.0f, 600.0f);
         static float rotationDeg = 0.0f;
         rotationDeg+= 0.1f;
