@@ -42,6 +42,22 @@ namespace Engine {
         const glm::mat4& GetViewMatrix() const { return m_viewMatrix;}
         const glm::mat4& GetViewProjectionMatrix() const { return m_viewProjectionMatrix;}
 
+
+        void ZoomTowards(const glm::vec3& targetPos, float targetZoom) {
+            float oldZoom = m_zoom;
+
+            if (oldZoom == 0.0f) return;
+
+            float zoomRatio =   oldZoom / targetZoom;
+
+            glm::vec3 oldPos = m_position;
+
+            glm::vec3 newPos = targetPos - (targetPos - oldPos) * zoomRatio;
+
+            SetZoom(targetZoom);
+            SetPosition(newPos);
+        }
+
     private:
         void RecalculateViewMatrix(){
             glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_position) * glm::rotate(glm::mat4(1.0f), glm::radians(m_rotation), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -51,10 +67,10 @@ namespace Engine {
 
         void RecalculateProjectionMatrix() {
             m_projectionMatrix = glm::ortho(
-                m_BoundsLeft * m_zoom,
-                m_BoundsRight * m_zoom,
-                m_BoundsBottom * m_zoom,
-                m_BoundsTop * m_zoom,
+                m_BoundsLeft / m_zoom,
+                m_BoundsRight / m_zoom,
+                m_BoundsBottom / m_zoom,
+                m_BoundsTop / m_zoom,
                 -1.0f,
                 1.0f
             );
