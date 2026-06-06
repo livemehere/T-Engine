@@ -35,7 +35,7 @@ namespace Engine {
         glfwTerminate();
     }
 
-    void Application::Run() const {
+    void Application::Run() {
 
         double lastTime = glfwGetTime();
 

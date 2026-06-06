@@ -14,7 +14,7 @@ namespace Engine {
         Application(const AppSpec& spec);
         ~Application();
 
-        void Run() const;
+        void Run();
 
         static Application& Get() {
             if (s_instance == nullptr) {

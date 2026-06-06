@@ -36,7 +36,6 @@ namespace Engine {
         GLFWwindow* window = nullptr;
 
         static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
-        static void ErrorCallback(int error, const char* description);
         static void LogOpenGLInfo();
     };
 }

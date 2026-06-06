@@ -11,7 +11,7 @@ namespace Engine {
         void Bind() const;
         void Unbind() const;
 
-        unsigned int Getcount() const { return m_count; }
+        unsigned int GetCount() const { return m_count; }
     private:
         unsigned int id = 0;
         unsigned int m_count = 0;
