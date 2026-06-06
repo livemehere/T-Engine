@@ -72,13 +72,14 @@ namespace Engine {
         VertexBuffer(const float* vertices, unsigned int size);
         ~VertexBuffer();
 
+        unsigned int GetId() const { return m_id; }
         void Bind() const;
         void Unbind() const;
 
         const BufferLayout& GetLayout() const { return m_layout; }
         void SetLayout(const BufferLayout& layout) { m_layout = layout; }
     private:
-        unsigned int id = 0;
+        unsigned int m_id = 0;
         BufferLayout m_layout;
     };
 }
