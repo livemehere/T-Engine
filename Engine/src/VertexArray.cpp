@@ -10,6 +10,7 @@ Engine::VertexArray::~VertexArray() {
 }
 
 void Engine::VertexArray::Bind() const {
+    glBindVertexArray(id);
     for (auto& vb : m_vertexBuffers) {
         vb->Bind();
     }
@@ -21,6 +22,7 @@ void Engine::VertexArray::UnBind() const {
         vb->Unbind();
     }
     m_indexBuffer->Unbind();
+    glBindVertexArray(0);
 }
 
 void Engine::VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer> &vertexBuffer) {
