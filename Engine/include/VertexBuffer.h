@@ -46,7 +46,7 @@ namespace Engine {
     public:
         BufferLayout() = default;
         BufferLayout(const std::initializer_list<BufferElement> elements) : m_elements(elements) {
-            CalcOffsetAndStrid();
+            CalcOffsetAndStride();
             LOG_INFO("Layout created");
         }
         ~BufferLayout() = default;
@@ -56,7 +56,7 @@ namespace Engine {
     private:
         std::vector<BufferElement> m_elements;
         unsigned int m_stride = 0;
-        void CalcOffsetAndStrid() {
+        void CalcOffsetAndStride() {
             unsigned int offset = 0;
             m_stride = 0;
             for (const auto& element : m_elements) {
@@ -74,7 +74,7 @@ namespace Engine {
 
         unsigned int GetId() const { return m_id; }
         void Bind() const;
-        void Unbind() const;
+        void UnBind() const;
 
         const BufferLayout& GetLayout() const { return m_layout; }
         void SetLayout(const BufferLayout& layout) { m_layout = layout; }

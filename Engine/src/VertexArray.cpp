@@ -20,9 +20,9 @@ namespace Engine {
 
     void VertexArray::UnBind() const {
         for (const auto& vb : m_vertexBuffers) {
-            vb->Unbind();
+            vb->UnBind();
         }
-        m_indexBuffer->Unbind();
+        m_indexBuffer->UnBind();
         glBindVertexArray(0);
     }
 

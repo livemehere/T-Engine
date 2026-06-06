@@ -20,7 +20,6 @@ static std::vector<float> vertices = {
 };
 
 class DummyLayer : public Engine::Layer {
-    unsigned int shaderProgram;
     bool wireFrame = false;
 
     std::unique_ptr<Engine::Texture> texture = std::make_unique<Engine::Texture>("../../../assets/noir.png");
@@ -39,7 +38,7 @@ public:
         // VBO
         auto vertexBuffer = std::make_shared<Engine::VertexBuffer>(vertices.data(), sizeof(float) * vertices.size());
         vertexBuffer->SetLayout({
-            {Engine::ShaderDataType::Float3, "aPosition"},
+            {Engine::ShaderDataType::Float3, "aPos"},
             {Engine::ShaderDataType::Float4, "aColor"},
             {Engine::ShaderDataType::Float2, "aTexCoord"},
         });
@@ -60,7 +59,7 @@ public:
         shader->Bind();
         texture->Bind(0);
         vertexArray->Bind();
-        glDrawElements(GL_TRIANGLES,vertexArray->GetIndexBuffer()->Getcount(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES,vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
     }
 };
 

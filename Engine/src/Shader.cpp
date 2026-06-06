@@ -9,11 +9,11 @@ namespace Engine {
     }
 
     Shader::~Shader() {
-        glDeleteProgram(id);
+        glDeleteProgram(m_id);
     }
 
     void Shader::Bind() {
-        glUseProgram(id);
+        glUseProgram(m_id);
     }
 
     void Shader::UnBind() {
@@ -28,8 +28,13 @@ namespace Engine {
             ss << in.rdbuf();
             result = ss.str();
         } else {
-            LOG_ERROR("[Shader] Failed to read file {}", filepath);
+            throw std::runtime_error(std::string("[Shader] Failed to read file: ") + filepath);
         }
+
+        if (result.empty()) {
+            throw std::runtime_error(std::string("[Shader] Shader source is empty: ") + filepath);
+        }
+
         return result;
     }
 
@@ -45,10 +50,10 @@ namespace Engine {
         char infoLog[512];
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-        if(!success)
-        {
-             glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            LOG_ERROR("[Shader] {} compile error \n {}", typeStr, infoLog);
+        if(!success) {
+            glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+            glDeleteShader(shader);
+            throw std::runtime_error("[Shader] " + typeStr + " compile error\n" + std::string(infoLog));
         }
 
         return shader;
@@ -61,16 +66,20 @@ namespace Engine {
         int success;
         char infoLog[512];
 
-        id = glCreateProgram();
+        m_id = glCreateProgram();
 
-        glAttachShader(id, vs);
-        glAttachShader(id, fs);
-        glLinkProgram(id);
-        glGetProgramiv(id, GL_LINK_STATUS, &success);
+        glAttachShader(m_id, vs);
+        glAttachShader(m_id, fs);
+        glLinkProgram(m_id);
+        glGetProgramiv(m_id, GL_LINK_STATUS, &success);
 
         if(!success) {
-            glGetProgramInfoLog(id, 512, nullptr, infoLog);
-            LOG_ERROR("[Shader] Failed to compile program\n {}", infoLog);
+            glGetProgramInfoLog(m_id, 512, nullptr, infoLog);
+            glDeleteProgram(m_id);
+            m_id = 0;
+            glDeleteShader(vs);
+            glDeleteShader(fs);
+            throw std::runtime_error(std::string("[Shader] Failed to compile program\n") + infoLog);
         }
         glDeleteShader(vs);
         glDeleteShader(fs);
