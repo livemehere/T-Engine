@@ -69,7 +69,7 @@ namespace Engine {
 
     class VertexBuffer {
     public:
-        VertexBuffer(float* vertices, unsigned int size);
+        VertexBuffer(const float* vertices, unsigned int size);
         ~VertexBuffer();
 
         void Bind() const;

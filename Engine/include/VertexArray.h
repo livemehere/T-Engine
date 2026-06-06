@@ -21,6 +21,7 @@ namespace Engine {
 
     private:
         unsigned int id;
+        unsigned int m_nextAttributeIndex = 0;
         // split VBO for dynamic update buffers
         std::vector<std::shared_ptr<VertexBuffer>> m_vertexBuffers;
         std::shared_ptr<IndexBuffer> m_indexBuffer;
