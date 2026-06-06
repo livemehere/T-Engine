@@ -32,7 +32,7 @@ namespace Engine {
             RecalculateViewMatrix();
         }
 
-        const glm::mat3& GetRotation() const { return m_rotation;}
+        float GetRotation() const { return m_rotation;}
         void SetRotation(float rotation) {
             m_rotation = rotation;
             RecalculateViewMatrix();
