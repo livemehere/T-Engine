@@ -7,9 +7,7 @@ namespace Engine {
         stbi_set_flip_vertically_on_load(true);
         data = stbi_load(filepath.c_str(),&width, &height,&channels, STBI_rgb_alpha);
         if (!data) {
-            LOG_ERROR("[Texture] image load failed {}", filepath);
-            // TODO: how to handle, exit process? or throw runtime error or fallback whiteTexture?
-            return;
+            throw std::runtime_error(std::string("[Texture] image load failed: ") + filepath);
         }
         LOG_INFO("[Texture] image loaded {}x{} (channels: {})", width, height, channels);
         UploadTexture();
@@ -47,6 +45,10 @@ namespace Engine {
     }
 
     void Texture::UploadTexture() {
+        if (data == nullptr) {
+            throw std::runtime_error("[Texture] cannot upload null texture data");
+        }
+
         glGenTextures(1,&id);
         glBindTexture(GL_TEXTURE_2D, id);
 
