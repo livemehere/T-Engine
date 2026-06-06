@@ -47,7 +47,7 @@ namespace Engine {
 
         if(!success)
         {
-            glGetShaderInfoLog(success, 512, nullptr, infoLog);
+             glGetShaderInfoLog(shader, 512, nullptr, infoLog);
             LOG_ERROR("[Shader] {} compile error \n {}", typeStr, infoLog);
         }
 
