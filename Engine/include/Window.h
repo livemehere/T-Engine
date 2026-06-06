@@ -20,9 +20,9 @@ namespace Engine {
         int GetHeight() const { return m_height; }
         int GetFrameBufferWidth() const { return m_frameBufferWidth; }
         int GetFrameBufferHeight() const { return m_frameBufferHeight; }
-        GLFWwindow* GetHandle() const { return window; }
+        GLFWwindow* GetHandle() const { return m_window; }
 
-        bool ShouldClose() const { return glfwWindowShouldClose(window); }
+        bool ShouldClose() const { return glfwWindowShouldClose(m_window); }
         void Update() const;
 
     private:
@@ -33,7 +33,7 @@ namespace Engine {
         int m_frameBufferHeight;
         bool m_vsync = true;
 
-        GLFWwindow* window = nullptr;
+        GLFWwindow* m_window = nullptr;
 
         static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
         static void LogOpenGLInfo();

@@ -17,40 +17,40 @@ namespace Engine {
         #endif
 
 
-        window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+        m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
 
-        if (!window) {
+        if (!m_window) {
             throw std::runtime_error("Failed to create window");
         }
 
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(m_window);
 
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-            glfwDestroyWindow(window);
-            window = nullptr;
+            glfwDestroyWindow(m_window);
+            m_window = nullptr;
             throw std::runtime_error("Failed to load GLAD");
         }
 
         LogOpenGLInfo();
 
-        glfwSetWindowUserPointer(window, this);
+        glfwSetWindowUserPointer(m_window, this);
 
         // for device pixel ratio
-        glfwGetFramebufferSize(window, &m_frameBufferWidth, &m_frameBufferHeight);
+        glfwGetFramebufferSize(m_window, &m_frameBufferWidth, &m_frameBufferHeight);
         glViewport(0, 0, m_frameBufferWidth, m_frameBufferHeight);
-        glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallback);
+        glfwSetFramebufferSizeCallback(m_window, FrameBufferSizeCallback);
         glfwSwapInterval(m_vsync ? 1 : 0);
     }
 
     Window::~Window() {
-        if (window != nullptr) {
-            glfwDestroyWindow(window);
-            window = nullptr;
+        if (m_window != nullptr) {
+            glfwDestroyWindow(m_window);
+            m_window = nullptr;
         }
     }
 
     void Window::Update() const {
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(m_window);
     }
 
     void Window::FrameBufferSizeCallback(GLFWwindow *window, int width, int height) {
