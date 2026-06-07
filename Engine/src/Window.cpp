@@ -77,6 +77,14 @@ namespace Engine {
         self->m_scrollYOffset += static_cast<float>(yOffset);
     }
 
+    void Window::CheckTextureLimits() {
+        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+        glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedUnits);
+
+        LOG_INFO("MAX Texture units: {}",maxTextureUnits);
+        LOG_INFO("MAX combined Texture units: {}",maxCombinedUnits);
+    }
+
     void Window::LogOpenGLInfo() {
         const char* glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
         const char* glslVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
@@ -91,5 +99,7 @@ namespace Engine {
         LOG_INFO("GLSL Version: {}", glslVersion);
         LOG_INFO("GPU Renderer: {}", renderer);
         LOG_INFO("GPU Vendor: {}", vendor);
+
+        CheckTextureLimits();
     }
 }

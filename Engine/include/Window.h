@@ -15,6 +15,9 @@ namespace Engine {
         Window(const WindowSpec& spec);
          ~Window();
 
+        static int maxTextureUnits;
+        static int maxCombinedUnits;
+
         std::string GetTitle() const { return m_title;};
         int GetWidth() const { return m_width; }
         int GetHeight() const { return m_height; }
@@ -39,6 +42,7 @@ namespace Engine {
 
         static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
         static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
+        static void CheckTextureLimits();
         static void LogOpenGLInfo();
     };
 }
