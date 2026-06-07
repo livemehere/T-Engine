@@ -43,6 +43,7 @@ namespace Engine {
         glfwGetFramebufferSize(m_window, &m_frameBufferWidth, &m_frameBufferHeight);
         glViewport(0, 0, m_frameBufferWidth, m_frameBufferHeight);
         glfwSetFramebufferSizeCallback(m_window, FrameBufferSizeCallback);
+        glfwSetScrollCallback(m_window, ScrollCallback);
         glfwSwapInterval(m_vsync ? 1 : 0);
     }
 
@@ -57,12 +58,23 @@ namespace Engine {
         glfwSwapBuffers(m_window);
     }
 
+    float Window::ConsumeScrollYOffset() {
+        const float scrollYOffset = m_scrollYOffset;
+        m_scrollYOffset = 0.0f;
+        return scrollYOffset;
+    }
+
     void Window::FrameBufferSizeCallback(GLFWwindow *window, int width, int height) {
         const auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
         glViewport(0,0,width,height);
         LOG_INFO("Viewport Changed : {}x{}",width,height);
         self->m_frameBufferWidth = width;
         self->m_frameBufferHeight = height;
+    }
+
+    void Window::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
+        const auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        self->m_scrollYOffset += static_cast<float>(yOffset);
     }
 
     void Window::LogOpenGLInfo() {
