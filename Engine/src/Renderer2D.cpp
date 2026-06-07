@@ -86,6 +86,7 @@ namespace Engine {
     }
 
     void Renderer2D::Shutdown() {
+        delete[] s_storage->rectVertexBufferBase;
         delete s_storage;
     }
 
