@@ -130,6 +130,10 @@ namespace Engine {
     // Rect Base
     void Renderer2D::m_DrawRect(const glm::vec2 &position, const glm::vec2 &size,
          const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
+        if (s_storage->rectIndexCount >= MAX_INDICES) {
+            throw std::runtime_error("Renderer2D batch overflow: flush is not implemented yet");
+        }
+
         texture->Bind();
 
         // transform
