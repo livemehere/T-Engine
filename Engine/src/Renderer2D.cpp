@@ -5,9 +5,9 @@
 
 namespace Engine {
 
-    static constexpr unsigned int MAX_RECT_COUNT = 10000;
-    static constexpr unsigned int MAX_VERTICES = 10000 * 4;
-    static constexpr unsigned int MAX_INDICES = 10000 * 6;
+    static constexpr unsigned int MAX_RECT_COUNT = 1000000;
+    static constexpr unsigned int MAX_VERTICES = MAX_RECT_COUNT * 4;
+    static constexpr unsigned int MAX_INDICES = MAX_RECT_COUNT * 6;
 
     struct RectVertex {
         glm::vec3 position;
