@@ -2,9 +2,11 @@
 
 namespace Engine {
     VertexBuffer::VertexBuffer(const Engine::RectVertex *vertices, unsigned int size) {
-        if (vertices == nullptr) {
-            throw std::runtime_error("VertexBuffer data cannot be null");
-        }
+
+        // NOTE: enable nullptr for batch rendering
+        // if (vertices == nullptr) {
+        //     throw std::runtime_error("VertexBuffer data cannot be null");
+        // }
 
         if (size == 0) {
             throw std::runtime_error("VertexBuffer size must be greater than zero");
@@ -34,5 +36,10 @@ namespace Engine {
 
     void VertexBuffer::UnBind() const {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    void VertexBuffer::SetData(const void *data, unsigned int size) {
+        glBindBuffer(GL_ARRAY_BUFFER, m_id);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
     }
 }

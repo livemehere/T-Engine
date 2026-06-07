@@ -5,29 +5,27 @@
 
 namespace Engine {
 
+    static constexpr unsigned int MAX_RECT_COUNT = 10000;
+    static constexpr unsigned int MAX_VERTICES = 10000 * 4;
+    static constexpr unsigned int MAX_INDICES = 10000 * 6;
+
     struct RectVertex {
         glm::vec3 position;
+        glm::vec4 color;
         glm::vec2 TexCoord;
     };
 
     struct Renderer2DStorage {
         Renderer2D::Statistics stats;
         std::shared_ptr<Engine::VertexArray> rectVAO;
+        std::shared_ptr<Engine::VertexBuffer> rectVBO;
         std::shared_ptr<Engine::Shader> textureShader;
         std::shared_ptr<Engine::Texture> whiteTexture;
-    };
 
-    static std::vector<RectVertex> rectVertices = {
-        // Position                // TexCoord
-        { {-0.5f,  0.5f, 0.0f},    {0.0f, 1.0f} }, // TL
-        { { 0.5f,  0.5f, 0.0f},    {1.0f, 1.0f} }, // TR
-        { {-0.5f, -0.5f, 0.0f},    {0.0f, 0.0f} }, // BL
-        { { 0.5f, -0.5f, 0.0f},    {1.0f, 0.0f} }  // BR
-    };
+        unsigned int rectIndexCount = 0; // total indices count of current frame
+        RectVertex* rectVertexBufferBase = nullptr; // starting point
+        RectVertex* rectVertexBufferPtr = nullptr; // current cursor
 
-    static std::vector<unsigned int> rectIndices = {
-        0,2,1,
-        1,2,3
     };
 
     static Renderer2DStorage* s_storage;
@@ -46,17 +44,37 @@ namespace Engine {
         // #### Rect Start ####
         s_storage->rectVAO = std::make_shared<Engine::VertexArray>();
 
-        // VBO
-        auto vertexBuffer = std::make_shared<Engine::VertexBuffer>(rectVertices.data(), sizeof(RectVertex) * rectVertices.size());
+        // #### VBO START ####
+        s_storage->rectVertexBufferBase = new RectVertex[MAX_VERTICES];
+        auto vertexBuffer = std::make_shared<Engine::VertexBuffer>(nullptr, sizeof(RectVertex) * MAX_VERTICES);
         vertexBuffer->SetLayout({
             {Engine::ShaderDataType::Float3, "aPos"},
+            {Engine::ShaderDataType::Float4, "aColor"},
             {Engine::ShaderDataType::Float2, "aTexCoord"},
         });
+        s_storage->rectVBO = vertexBuffer;
         s_storage->rectVAO->AddVertexBuffer(vertexBuffer);
+        // #### VBO END ####
 
-        // EBO
-        auto indexBuffer = std::make_shared<Engine::IndexBuffer>(rectIndices.data(),static_cast<unsigned int>(rectIndices.size()));
+        // #### EBO START ####
+        unsigned int* rectIndices = new unsigned int[MAX_INDICES];
+        unsigned int offset = 0;
+
+        for (unsigned int i=0; i< MAX_INDICES; i+=6) {
+            rectIndices[i + 0] = offset + 0;
+            rectIndices[i + 1] = offset + 1;
+            rectIndices[i + 2] = offset + 2;
+
+            rectIndices[i + 3] = offset + 2;
+            rectIndices[i + 4] = offset + 3;
+            rectIndices[i + 5] = offset + 0;
+            offset +=4;
+        }
+        auto indexBuffer = std::make_shared<Engine::IndexBuffer>(rectIndices,MAX_INDICES);
         s_storage->rectVAO->SetIndexBuffer(indexBuffer);
+        delete[] rectIndices;
+        // #### EBO END ####
+
 
         // 1x1 white Texture
         unsigned char whitePixel[] = { 255, 255, 255, 255 };
@@ -78,10 +96,22 @@ namespace Engine {
         // camera
         int vpLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uViewProjection");
         glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(camera.GetViewProjectionMatrix()));
+
+        // batching init
+        s_storage->rectIndexCount = 0;
+        s_storage->rectVertexBufferPtr = s_storage->rectVertexBufferBase;
     }
 
     void Renderer2D::EndScene() {
-        // TODO: Batch Rendering Flush
+        if (s_storage->rectIndexCount == 0) return;
+
+        uint32_t dataSize = (uint32_t)((uint8_t*)s_storage->rectVertexBufferPtr - (uint8_t*)s_storage->rectVertexBufferBase);
+        s_storage->rectVBO->SetData(s_storage->rectVertexBufferBase, dataSize);
+
+        s_storage->rectVAO->Bind();
+        s_storage->textureShader->Bind();
+        glDrawElements(GL_TRIANGLES,s_storage->rectIndexCount, GL_UNSIGNED_INT, 0);
+        s_storage->stats.drawCalls++;
     }
 
     // Rect with solid color
@@ -99,12 +129,7 @@ namespace Engine {
     // Rect Base
     void Renderer2D::m_DrawRect(const glm::vec2 &position, const glm::vec2 &size,
          const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
-        s_storage->textureShader->Bind();
         texture->Bind();
-
-        // color
-        int colorLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uColor");
-        glUniform4fv(colorLoc,1, glm::value_ptr(color));
 
         // transform
         // pivot
@@ -117,13 +142,28 @@ namespace Engine {
         * glm::translate(glm::mat4(1.0f), pivotOffset)
         * glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 1.0f)); // scale
 
-        int transformLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uTransform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        constexpr glm::vec4 vertexBasePositions[4] = {
+            { -0.5f, -0.5f, 0.0f, 1.0f }, // BL
+            {  0.5f, -0.5f, 0.0f, 1.0f }, // BR
+            {  0.5f,  0.5f, 0.0f, 1.0f }, // TR
+            { -0.5f,  0.5f, 0.0f, 1.0f }  // TL
+        };
 
-        s_storage->rectVAO->Bind();
-        glDrawElements(GL_TRIANGLES,s_storage->rectVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+        constexpr glm::vec2 textureCoords[4] = {
+            { 0.0f, 0.0f }, // BL
+            { 1.0f, 0.0f }, // BR
+            { 1.0f, 1.0f }, // TR
+            { 0.0f, 1.0f }  // TL
+        };
 
-        s_storage->stats.drawCalls++;
+        for (size_t i = 0; i < 4; i++) {
+            s_storage->rectVertexBufferPtr->position = transform * vertexBasePositions[i];
+            s_storage->rectVertexBufferPtr->color = color;
+            s_storage->rectVertexBufferPtr->TexCoord = textureCoords[i];
+            s_storage->rectVertexBufferPtr++;
+        }
+
+        s_storage->rectIndexCount += 6;
         s_storage->stats.rectCount++;
 
     }

@@ -82,6 +82,8 @@ namespace Engine {
 
         const BufferLayout& GetLayout() const { return m_layout; }
         void SetLayout(const BufferLayout& layout) { m_layout = layout; }
+
+        void SetData(const void* data, unsigned int size);
     private:
         unsigned int m_id = 0;
         BufferLayout m_layout;
