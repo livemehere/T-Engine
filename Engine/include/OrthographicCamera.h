@@ -48,7 +48,7 @@ namespace Engine {
 
             if (oldZoom == 0.0f) return;
 
-            float zoomRatio =   oldZoom / targetZoom;
+            float zoomRatio = oldZoom / targetZoom;
 
             glm::vec3 oldPos = m_position;
 

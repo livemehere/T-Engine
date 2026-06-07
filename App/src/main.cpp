@@ -66,14 +66,17 @@ public:
         shader->Bind();
         texture->Bind(0);
 
-        camera->SetZoom(camera->GetZoom() + 0.01f);
-
         int vpLoc = glGetUniformLocation(shader->GetId(), "uViewProjection");
         glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(camera->GetViewProjectionMatrix()));
 
         auto window = Engine::Application::Get().GetWindow();
         float width = static_cast<float>(window->GetWidth());
         float height = static_cast<float>(window->GetHeight());
+
+
+        camera->ZoomTowards(glm::vec3(width, height/2,0.0f), glm::mix(camera->GetZoom(), 2.0f, 0.01f));
+        // camera->SetZoom(camera->GetZoom() + 0.001f);
+
 
         // transform
         glm::vec3 position(width/2, height/2, 0.0f);
