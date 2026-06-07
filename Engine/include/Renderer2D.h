@@ -7,6 +7,13 @@
 namespace Engine {
     class Renderer2D {
     public:
+        struct Statistics {
+            unsigned int drawCalls = 0;
+            unsigned int rectCount = 0;
+        };
+        static void ResetStats();
+        static Statistics GetStats();
+
         static void Init();
         static void Shutdown();
 

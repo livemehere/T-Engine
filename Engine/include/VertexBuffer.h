@@ -2,7 +2,11 @@
 
 #include "EngineCommon.h"
 
+
+
 namespace Engine {
+
+    struct RectVertex;
 
     enum class ShaderDataType {
         Float, Float2, Float3, Float4
@@ -69,7 +73,7 @@ namespace Engine {
 
     class VertexBuffer {
     public:
-        VertexBuffer(const float* vertices, unsigned int size);
+        VertexBuffer(const Engine::RectVertex* vertices, unsigned int size);
         ~VertexBuffer();
 
         unsigned int GetId() const { return m_id; }

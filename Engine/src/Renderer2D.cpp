@@ -5,25 +5,40 @@
 
 namespace Engine {
 
-    static std::vector<float> rectVertices = {
-        // xyz                   // UV
-        -0.5f, 0.5f, 0.0f,       0.0f, 1.0f, // TL
-        0.5f, 0.5f, 0.0f,        1.0f, 1.0f, // TR
-        -0.5f, -0.5f, 0.0f,      0.0f, 0.0f, // BL
-        0.5f, -0.5f, 0.0f,       1.0f, 0.0f, // BR
-    };
-    static std::vector<unsigned int> rectIndices = {
-        0,2,1,
-        1,2,3
+    struct RectVertex {
+        glm::vec3 position;
+        glm::vec2 TexCoord;
     };
 
     struct Renderer2DStorage {
+        Renderer2D::Statistics stats;
         std::shared_ptr<Engine::VertexArray> rectVAO;
         std::shared_ptr<Engine::Shader> textureShader;
         std::shared_ptr<Engine::Texture> whiteTexture;
     };
 
+    static std::vector<RectVertex> rectVertices = {
+        // Position                // TexCoord
+        { {-0.5f,  0.5f, 0.0f},    {0.0f, 1.0f} }, // TL
+        { { 0.5f,  0.5f, 0.0f},    {1.0f, 1.0f} }, // TR
+        { {-0.5f, -0.5f, 0.0f},    {0.0f, 0.0f} }, // BL
+        { { 0.5f, -0.5f, 0.0f},    {1.0f, 0.0f} }  // BR
+    };
+
+    static std::vector<unsigned int> rectIndices = {
+        0,2,1,
+        1,2,3
+    };
+
     static Renderer2DStorage* s_storage;
+
+    void Renderer2D::ResetStats() {
+        memset(&s_storage->stats, 0, sizeof(Statistics));
+    }
+
+    Renderer2D::Statistics Renderer2D::GetStats() {
+        return s_storage->stats;
+    }
 
     void Renderer2D::Init() {
         s_storage = new Renderer2DStorage();
@@ -32,7 +47,7 @@ namespace Engine {
         s_storage->rectVAO = std::make_shared<Engine::VertexArray>();
 
         // VBO
-        auto vertexBuffer = std::make_shared<Engine::VertexBuffer>(rectVertices.data(), sizeof(float) * rectVertices.size());
+        auto vertexBuffer = std::make_shared<Engine::VertexBuffer>(rectVertices.data(), sizeof(RectVertex) * rectVertices.size());
         vertexBuffer->SetLayout({
             {Engine::ShaderDataType::Float3, "aPos"},
             {Engine::ShaderDataType::Float2, "aTexCoord"},
@@ -107,5 +122,9 @@ namespace Engine {
 
         s_storage->rectVAO->Bind();
         glDrawElements(GL_TRIANGLES,s_storage->rectVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+
+        s_storage->stats.drawCalls++;
+        s_storage->stats.rectCount++;
+
     }
 } // Engine

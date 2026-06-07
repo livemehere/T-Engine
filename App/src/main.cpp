@@ -27,6 +27,9 @@ public:
     }
 
     void OnUpdate(float dt) override {
+        auto stats = Engine::Renderer2D::GetStats();
+        float fps = 1.0f / dt;
+        LOG_INFO("FPS: {:.1f} | draw Calls: {} | rect: {}", fps, stats.drawCalls, stats.rectCount);
     }
 
     void OnRender() override {
@@ -36,12 +39,12 @@ public:
         float height = static_cast<float>(window->GetHeight());
 
 
-        camera->ZoomTowards(glm::vec3(width, height/2,0.0f), glm::mix(camera->GetZoom(), 2.0f, 0.01f));
+        // camera->ZoomTowards(glm::vec3(width, height/2,0.0f), glm::mix(camera->GetZoom(), 2.0f, 0.01f));
         // camera->SetZoom(camera->GetZoom() + 0.001f);
 
 
-        static int gap = 50;
-        static glm::vec2 size(100.0f, 100.0f);
+        static int gap = 5;
+        static glm::vec2 size(10.0f, 10.0f);
         static float rotationDeg = 0.0f;
         static glm::vec4 color = {1.0f,1.0f,1.0f,1.0f};
         rotationDeg+= 0.5f;
@@ -57,10 +60,6 @@ public:
                 Engine::Renderer2D::EndScene();
             }
         }
-
-
-
-
 
 
 

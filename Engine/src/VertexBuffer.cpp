@@ -1,7 +1,7 @@
 #include "VertexBuffer.h"
 
 namespace Engine {
-    VertexBuffer::VertexBuffer(const float *vertices, unsigned int size) {
+    VertexBuffer::VertexBuffer(const Engine::RectVertex *vertices, unsigned int size) {
         if (vertices == nullptr) {
             throw std::runtime_error("VertexBuffer data cannot be null");
         }
