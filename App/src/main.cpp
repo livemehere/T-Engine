@@ -36,22 +36,29 @@ public:
         float height = static_cast<float>(window->GetHeight());
 
 
-        // camera->ZoomTowards(glm::vec3(width, height/2,0.0f), glm::mix(camera->GetZoom(), 2.0f, 0.01f));
+        camera->ZoomTowards(glm::vec3(width, height/2,0.0f), glm::mix(camera->GetZoom(), 2.0f, 0.01f));
         // camera->SetZoom(camera->GetZoom() + 0.001f);
 
-        // transform
-        glm::vec3 position(width/2, height/2, 0.0f);
+
+        static int gap = 50;
         static glm::vec2 size(100.0f, 100.0f);
         static float rotationDeg = 0.0f;
         static glm::vec4 color = {1.0f,1.0f,1.0f,1.0f};
-        rotationDeg+= 0.1f;
-        // scale.x += 10.0f;
+        rotationDeg+= 0.5f;
 
-        Engine::Renderer2D::BeginScene(*camera);
+        for (int x = 0; x<width; x+= size.x + gap) {
+            for (int y = 0; y < height; y+= size.y + gap) {
+                glm::vec3 position(x + size.x/2, y + size.y/2, 2.0f);
 
-        Engine::Renderer2D::DrawRect(position, size, color, rotationDeg);
+                Engine::Renderer2D::BeginScene(*camera);
 
-        Engine::Renderer2D::EndScene();
+                Engine::Renderer2D::DrawRect(position, size, color, rotationDeg);
+
+                Engine::Renderer2D::EndScene();
+            }
+        }
+
+
 
 
 
