@@ -38,12 +38,6 @@ namespace Engine {
         }
     }
 
-    std::shared_ptr<Texture> Texture::GetWhiteTexture() {
-        static unsigned char whitePixel[] = { 255, 255, 255, 255 };
-        static auto whiteTexture = std::make_shared<Texture>(whitePixel, 1,1,4);
-        return whiteTexture;
-    }
-
     void Texture::Bind(unsigned int slot) const {
         glActiveTexture(GL_TEXTURE0+slot);
         glBindTexture(GL_TEXTURE_2D, m_id);
