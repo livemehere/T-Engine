@@ -15,8 +15,8 @@ namespace Engine {
         Window(const WindowSpec& spec);
          ~Window();
 
-        static int maxTextureUnits;
-        static int maxCombinedUnits;
+        inline static int maxTextureUnits = 0;
+        inline static int maxCombinedUnits = 0;
 
         std::string GetTitle() const { return m_title;};
         int GetWidth() const { return m_width; }

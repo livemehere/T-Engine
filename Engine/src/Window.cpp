@@ -78,11 +78,11 @@ namespace Engine {
     }
 
     void Window::CheckTextureLimits() {
-        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
-        glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxCombinedUnits);
+        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &Window::maxTextureUnits);
+        glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &Window::maxCombinedUnits);
 
-        LOG_INFO("MAX Texture units: {}",maxTextureUnits);
-        LOG_INFO("MAX combined Texture units: {}",maxCombinedUnits);
+        LOG_INFO("MAX Texture units: {}",Window::maxTextureUnits);
+        LOG_INFO("MAX combined Texture units: {}",Window::maxCombinedUnits);
     }
 
     void Window::LogOpenGLInfo() {
