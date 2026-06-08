@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/400fea33-e555-4ee4-ad3e-6cbaa22a639e
 
 > 230400 rect on 1 draw calls
 
-https://github.com/user-attachments/assets/dbe59681-43d7-4aa2-a384-654f3c6c851c
+https://github.com/user-attachments/assets/dc0eb929-e556-4b05-b010-6846f9271d24
 
 ---
 
