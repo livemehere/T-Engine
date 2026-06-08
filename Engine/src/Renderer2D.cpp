@@ -2,9 +2,11 @@
 
 #include "Shader.h"
 #include "VertexArray.h"
+#include "Window.h"
 
 namespace Engine {
 
+    static constexpr unsigned int TEXTURE_SAMPLES_COUNT = 16;
     static constexpr unsigned int MAX_RECT_COUNT = 1000000;
     static constexpr unsigned int MAX_VERTICES = MAX_RECT_COUNT * 4;
     static constexpr unsigned int MAX_INDICES = MAX_RECT_COUNT * 6;
@@ -13,6 +15,7 @@ namespace Engine {
         glm::vec3 position;
         glm::vec4 color;
         glm::vec2 TexCoord;
+        float textureIndex;
     };
 
     struct Renderer2DStorage {
@@ -25,6 +28,10 @@ namespace Engine {
         unsigned int rectIndexCount = 0; // total indices count of current frame
         RectVertex* rectVertexBufferBase = nullptr; // starting point
         RectVertex* rectVertexBufferPtr = nullptr; // current cursor
+
+        // texture
+        std::vector<std::shared_ptr<Engine::Texture>> textureSlots;
+        float textureSlotIndex = 1.0f; // 0 = whiteTexture fixed;
 
     };
 
@@ -51,6 +58,7 @@ namespace Engine {
             {Engine::ShaderDataType::Float3, "aPos"},
             {Engine::ShaderDataType::Float4, "aColor"},
             {Engine::ShaderDataType::Float2, "aTexCoord"},
+            {Engine::ShaderDataType::Float, "aTextureIndex"},
         });
         s_storage->rectVBO = vertexBuffer;
         s_storage->rectVAO->AddVertexBuffer(vertexBuffer);
@@ -80,9 +88,23 @@ namespace Engine {
         unsigned char whitePixel[] = { 255, 255, 255, 255 };
         s_storage->whiteTexture = std::make_shared<Texture>(whitePixel, 1,1,4);
 
+        // texture slots
+        s_storage->textureSlots.resize(TEXTURE_SAMPLES_COUNT);
+        s_storage->textureSlots[0] = s_storage->whiteTexture;
+
         // shader
         s_storage->textureShader = std::make_shared<Engine::Shader>("../../../assets/shaders/Texture.vert","../../../assets/shaders/Texture.frag");
+        s_storage->textureShader->Bind();
         // #### Rect End ####
+
+        // texture
+        int samplers[TEXTURE_SAMPLES_COUNT];
+        for (int i=0; i<TEXTURE_SAMPLES_COUNT;i++) {
+            samplers[i] = i;
+        }
+        int texturesLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uTextures");
+        glUniform1iv(texturesLoc, TEXTURE_SAMPLES_COUNT, samplers);
+
     }
 
     void Renderer2D::Shutdown() {
@@ -101,6 +123,10 @@ namespace Engine {
         // batching init
         s_storage->rectIndexCount = 0;
         s_storage->rectVertexBufferPtr = s_storage->rectVertexBufferBase;
+
+        // texture
+        s_storage->textureSlotIndex = 1.0f;
+        s_storage->textureSlots[0] = s_storage->whiteTexture;
     }
 
     void Renderer2D::EndScene() {
@@ -108,6 +134,10 @@ namespace Engine {
 
         uint32_t dataSize = (uint32_t)((uint8_t*)s_storage->rectVertexBufferPtr - (uint8_t*)s_storage->rectVertexBufferBase);
         s_storage->rectVBO->SetData(s_storage->rectVertexBufferBase, dataSize);
+
+        for (int i=0; i<(int)s_storage->textureSlotIndex; i++) {
+            s_storage->textureSlots[i]->Bind(i);
+        }
 
         s_storage->rectVAO->Bind();
         s_storage->textureShader->Bind();
@@ -129,12 +159,31 @@ namespace Engine {
 
     // Rect Base
     void Renderer2D::m_DrawRect(const glm::vec2 &position, const glm::vec2 &size,
-         const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
+        const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
         if (s_storage->rectIndexCount >= MAX_INDICES) {
             throw std::runtime_error("Renderer2D batch overflow: flush is not implemented yet");
         }
 
-        texture->Bind();
+        float textureIndex = 0.0f;
+
+        for (int i = 1; i < TEXTURE_SAMPLES_COUNT; i++) {
+            // re-use
+            if (s_storage->textureSlots[i].get() == texture.get()) {
+                textureIndex = (float)i;
+                break;
+            }
+        }
+
+        // new texture
+        if (textureIndex == 0.0f) {
+            if (s_storage->textureSlotIndex >= TEXTURE_SAMPLES_COUNT) {
+                throw std::runtime_error("Renderer2D texture slot overflow: flush is not implemented yet");
+            }
+
+            textureIndex = s_storage->textureSlotIndex;
+            s_storage->textureSlots[(int)textureIndex] = texture;
+            s_storage->textureSlotIndex++;
+        }
 
         // transform
         // pivot
@@ -147,14 +196,14 @@ namespace Engine {
         * glm::translate(glm::mat4(1.0f), pivotOffset)
         * glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 1.0f)); // scale
 
-        constexpr glm::vec4 vertexBasePositions[4] = {
+        static glm::vec4 vertexBasePositions[4] = {
             { -0.5f, -0.5f, 0.0f, 1.0f }, // BL
             {  0.5f, -0.5f, 0.0f, 1.0f }, // BR
             {  0.5f,  0.5f, 0.0f, 1.0f }, // TR
             { -0.5f,  0.5f, 0.0f, 1.0f }  // TL
         };
 
-        constexpr glm::vec2 textureCoords[4] = {
+        static glm::vec2 textureCoords[4] = {
             { 0.0f, 0.0f }, // BL
             { 1.0f, 0.0f }, // BR
             { 1.0f, 1.0f }, // TR
@@ -165,6 +214,7 @@ namespace Engine {
             s_storage->rectVertexBufferPtr->position = transform * vertexBasePositions[i];
             s_storage->rectVertexBufferPtr->color = color;
             s_storage->rectVertexBufferPtr->TexCoord = textureCoords[i];
+            s_storage->rectVertexBufferPtr->textureIndex = textureIndex;
             s_storage->rectVertexBufferPtr++;
         }
 
