@@ -2,12 +2,11 @@
 
 #include "Shader.h"
 #include "VertexArray.h"
-#include "Window.h"
 
 namespace Engine {
 
     static constexpr unsigned int TEXTURE_SAMPLES_COUNT = 16;
-    static constexpr unsigned int MAX_RECT_COUNT = 1000000;
+    static constexpr unsigned int MAX_RECT_COUNT = 10000;
     static constexpr unsigned int MAX_VERTICES = MAX_RECT_COUNT * 4;
     static constexpr unsigned int MAX_INDICES = MAX_RECT_COUNT * 6;
 
@@ -120,16 +119,34 @@ namespace Engine {
         int vpLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uViewProjection");
         glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(camera.GetViewProjectionMatrix()));
 
-        // batching init
-        s_storage->rectIndexCount = 0;
-        s_storage->rectVertexBufferPtr = s_storage->rectVertexBufferBase;
-
-        // texture
-        s_storage->textureSlotIndex = 1.0f;
-        s_storage->textureSlots[0] = s_storage->whiteTexture;
+        StartBatch();
     }
 
+
     void Renderer2D::EndScene() {
+        Flush();
+    }
+
+    // Rect with solid color
+    void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+        float rotationDeg) {
+        m_DrawRect(position, size, color, s_storage->whiteTexture, rotationDeg);
+    }
+
+    // Rect with texture & color
+    void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size,
+         const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
+        m_DrawRect(position, size, color, texture, rotationDeg);
+    }
+
+    void Renderer2D::StartBatch() {
+        s_storage->rectIndexCount = 0;
+        s_storage->rectVertexBufferPtr = s_storage->rectVertexBufferBase;
+        // texture
+        s_storage->textureSlotIndex = 1.0f;
+    }
+
+    void Renderer2D::Flush() {
         if (s_storage->rectIndexCount == 0) return;
 
         uint32_t dataSize = (uint32_t)((uint8_t*)s_storage->rectVertexBufferPtr - (uint8_t*)s_storage->rectVertexBufferBase);
@@ -145,23 +162,13 @@ namespace Engine {
         s_storage->stats.drawCalls++;
     }
 
-    // Rect with solid color
-    void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
-        float rotationDeg) {
-        m_DrawRect(position, size, color, s_storage->whiteTexture, rotationDeg);
-    }
-
-    // Rect with texture & color
-    void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size,
-         const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
-        m_DrawRect(position, size, color, texture, rotationDeg);
-    }
 
     // Rect Base
     void Renderer2D::m_DrawRect(const glm::vec2 &position, const glm::vec2 &size,
         const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
         if (s_storage->rectIndexCount >= MAX_INDICES) {
-            throw std::runtime_error("Renderer2D batch overflow: flush is not implemented yet");
+            Flush();
+            StartBatch();
         }
 
         float textureIndex = 0.0f;
@@ -177,7 +184,8 @@ namespace Engine {
         // new texture
         if (textureIndex == 0.0f) {
             if (s_storage->textureSlotIndex >= TEXTURE_SAMPLES_COUNT) {
-                throw std::runtime_error("Renderer2D texture slot overflow: flush is not implemented yet");
+                Flush();
+                StartBatch();
             }
 
             textureIndex = s_storage->textureSlotIndex;

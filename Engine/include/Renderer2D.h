@@ -26,6 +26,9 @@ namespace Engine {
         // texture
         static void DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Engine::Texture>& texture, float rotationDeg = 0.0f);
     private:
+        static void StartBatch();
+        static void Flush();
+
         static void m_DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Engine::Texture>& texture, float rotationDeg = 0.0f);
     };
 
