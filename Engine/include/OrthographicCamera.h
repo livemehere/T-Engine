@@ -67,6 +67,15 @@ namespace Engine {
             return glm::vec3(worldCoords);
         }
 
+        glm::vec2 WorldToScreen(const glm::vec3& worldPos, const glm::vec2& viewPortSize) {
+            glm::vec4 ndc = GetViewProjectionMatrix() * glm::vec4(worldPos, 1.0f);
+
+            float screenX = ((ndc.x + 1.0f)/2.0f) * viewPortSize.x;
+            float screenY = ((1.0f - ndc.y)/2.0f) * viewPortSize.y;
+
+            return glm::vec2(screenX, screenY);
+        }
+
     private:
         void RecalculateViewMatrix(){
             glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_position) * glm::rotate(glm::mat4(1.0f), glm::radians(m_rotation), glm::vec3(0.0f, 0.0f, 1.0f));

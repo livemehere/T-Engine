@@ -9,6 +9,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "AssetManager.h"
+
 class DummyLayer : public Engine::Layer {
     bool wireFrame = false;
 
@@ -28,8 +30,8 @@ public:
         float height = static_cast<float>(window->GetHeight());
         camera = std::make_unique<Engine::OrthographicCamera>(0.0f, width, 0.0f, height);
         targetZoom = camera->GetZoom();
-        texture = std::make_shared<Engine::Texture>("../../../assets/noir.png");
-        texture2 = std::make_shared<Engine::Texture>("../../../assets/spider.png");
+        texture = Engine::AssetManager::LoadTexture("noir","../../../assets/noir.png");
+        texture2 = Engine::AssetManager::LoadTexture("spider","../../../assets/spider.png");
         glPolygonMode(GL_FRONT_AND_BACK,wireFrame ? GL_LINE : GL_FILL);
 
         Engine::Renderer2D::Init();
@@ -46,6 +48,10 @@ public:
     ~DummyLayer() = default;
 
     void OnUpdate(float dt) override {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         auto window = Engine::Application::Get().GetWindow();
         auto* handle = window->GetHandle();
 
@@ -74,24 +80,23 @@ public:
             targetZoom = std::max(minZoom, targetZoom + scrollYOffset * zoomStep);
         }
 
+        auto screenWidth = (float)window->GetWidth();
+        auto screenHeight = (float)window->GetHeight();
+
+        double screenX = 0.0;
+        double screenY = 0.0;
+        glfwGetCursorPos(handle, &screenX, &screenY);
+
+        const glm::vec3 worldCursor = camera->ScreenToWorld({screenX, screenY},{screenWidth, screenHeight});
+
+        ImGui::Begin("Mouse");
+        ImGui::Text("World : %.1f x %.1f", worldCursor.x, worldCursor.y);
+
+        ImGui::End();
+
         const float nextZoom = glm::mix(currentZoom, targetZoom, zoomLerpFactor);
         if (std::abs(nextZoom - currentZoom) > 0.0001f) {
-            double cursorX = 0.0;
-            double cursorY = 0.0;
-            glfwGetCursorPos(handle, &cursorX, &cursorY);
-
-            const float normalizedX = static_cast<float>(cursorX) / static_cast<float>(window->GetWidth());
-            const float normalizedY = static_cast<float>(cursorY) / static_cast<float>(window->GetHeight());
-            const float viewWidth = static_cast<float>(window->GetWidth()) / currentZoom;
-            const float viewHeight = static_cast<float>(window->GetHeight()) / currentZoom;
-
-            const glm::vec3 cursorWorldPosition = {
-                camera->GetPosition().x + normalizedX * viewWidth,
-                camera->GetPosition().y + (1.0f - normalizedY) * viewHeight,
-                0.0f
-            };
-
-            camera->ZoomTowards(cursorWorldPosition, nextZoom);
+            camera->ZoomTowards(worldCursor, nextZoom);
         }
     }
 
@@ -109,6 +114,15 @@ public:
         const int step = static_cast<int>(size.x) + gap;
         rotationDeg+= 1.0f;
 
+        ImDrawList* drawList = ImGui::GetForegroundDrawList();
+
+        auto* handle = window->GetHandle();
+        double screenX = 0.0;
+        double screenY = 0.0;
+        glfwGetCursorPos(handle, &screenX, &screenY);
+        glm::vec2 circlePos = camera->WorldToScreen({width/5/2, height/5/2, 0.0f}, {width/5, height/5});
+        drawList->AddCircle(ImVec2(screenX, screenY),10.0f * camera->GetZoom(), IM_COL32(0,255,0,255), 232, 2.0f);
+
         Engine::Renderer2D::BeginScene(*camera);
 
         for (int x = 0; x<width; x+= step) {
@@ -121,9 +135,7 @@ public:
 
         Engine::Renderer2D::EndScene();
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+
 
         ImGui::Begin("Stats");
         ImGui::SetWindowFontScale(1.5f);
@@ -155,6 +167,7 @@ int main() {
         app.Run();
 
         Engine::Renderer2D::Shutdown();
+        Engine::AssetManager::Shutdown();
 
         return 0;
     } catch (const std::exception& e) {
