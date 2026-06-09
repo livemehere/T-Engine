@@ -58,6 +58,15 @@ namespace Engine {
             SetPosition(newPos);
         }
 
+        glm::vec3 ScreenToWorld(const glm::vec2& screenPos, const glm::vec2& viewPortSize) {
+            float ndcX = 2.0f * (screenPos.x / viewPortSize.x) - 1.0f;
+            float ndcY = 1.0f - (screenPos.y / viewPortSize.y * 2.0f);
+            glm::vec4 ndcCoords(ndcX, ndcY, 0.0f, 1.0f);
+            glm::mat4 inverseVP = glm::inverse(GetViewProjectionMatrix());
+            glm::vec4 worldCoords = inverseVP * ndcCoords;
+            return glm::vec3(worldCoords);
+        }
+
     private:
         void RecalculateViewMatrix(){
             glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_position) * glm::rotate(glm::mat4(1.0f), glm::radians(m_rotation), glm::vec3(0.0f, 0.0f, 1.0f));
