@@ -1,7 +1,5 @@
 #pragma once
 
-#include "EngineCommon.h"
-
 /**
  * ⚠️ TODO: must managed by like 'AssetManager' with caching.
  * 1. Load data at RAM from file
