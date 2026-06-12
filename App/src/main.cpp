@@ -1,15 +1,15 @@
-#include "../../Engine/src/Application.h"
-#include "../../Engine/src/IndexBuffer.h"
-#include "../../Engine/src/OrthographicCamera.h"
-#include "../../Engine/src/Renderer2D.h"
-#include "../../Engine/src/Texture.h"
-#include "../../Engine/src/Window.h"
+#include "Application.h"
+#include "IndexBuffer.h"
+#include "OrthographicCamera.h"
+#include "Renderer2D.h"
+#include "Texture.h"
+#include "Window.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "../../Engine/src/AssetManager.h"
+#include "AssetManager.h"
 
 class DummyLayer : public Engine::Layer {
     bool wireFrame = false;
