@@ -2,6 +2,9 @@
 
 #include <stdexcept>
 
+#include "AssetManager.h"
+#include "Renderer2D.h"
+
 namespace Engine {
     Application* Application::s_instance = nullptr;
 
@@ -29,6 +32,10 @@ namespace Engine {
     }
 
     Application::~Application() {
+
+        Renderer2D::Shutdown();
+        AssetManager::Shutdown();
+
         m_layerStack.clear();
         m_window.reset();
         s_instance = nullptr;
