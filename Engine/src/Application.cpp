@@ -44,6 +44,8 @@ namespace Engine {
 
     void Application::Run() {
 
+        Renderer2D::Init();
+
         double lastTime = glfwGetTime();
 
         while (!m_window->ShouldClose()) {

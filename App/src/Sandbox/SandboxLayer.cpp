@@ -12,7 +12,6 @@ SandboxLayer::SandboxLayer(std::shared_ptr<Engine::OrthographicCamera> camera)
 
     glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
 
-    Engine::Renderer2D::Init();
 }
 
 void SandboxLayer::OnUpdate(float dt) {
