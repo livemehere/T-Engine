@@ -13,7 +13,7 @@ find_package(glm REQUIRED)
 
 add_library(Engine STATIC ${SOURCES})
 
-target_include_directories(Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(Engine PUBLIC
         OpenGL::GL
@@ -23,4 +23,4 @@ target_link_libraries(Engine PUBLIC
         glm::glm
 )
 
-target_precompile_headers(Engine PRIVATE include/EngineCommon.h)
+target_precompile_headers(Engine PRIVATE src/EngineCommon.h)

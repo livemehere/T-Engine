@@ -1,4 +1,4 @@
-#include "../include/AssetManager.h"
+#include "AssetManager.h"
 
 namespace Engine {
     std::unordered_map<std::string, std::shared_ptr<Texture>> AssetManager::s_textures;

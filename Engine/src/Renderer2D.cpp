@@ -1,4 +1,4 @@
-#include "../include/Renderer2D.h"
+#include "Renderer2D.h"
 
 #include "Shader.h"
 #include "VertexArray.h"
