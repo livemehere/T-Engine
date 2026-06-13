@@ -18,6 +18,12 @@ https://github.com/user-attachments/assets/dc0eb929-e556-4b05-b010-6846f9271d24
 
 ## TODO
 
+- [ ] refactor OpenGL classes
+- [ ] Renderer2D
+
+
+---
+
 - [x] Basic Render System
 - [x] Camera System
 - [x] Render2D with Texture
