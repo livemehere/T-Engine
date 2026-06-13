@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "AssetManager.h"
+#include "Resource/AssetManager.h"
 #include "Renderer2D.h"
 
 namespace Engine {

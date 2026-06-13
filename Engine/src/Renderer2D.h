@@ -2,7 +2,7 @@
 
 #include "EngineCommon.h"
 #include "OrthographicCamera.h"
-#include "Texture.h"
+#include "Resource/Texture.h"
 
 namespace Engine {
     class Renderer2D {

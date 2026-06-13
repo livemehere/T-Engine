@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "../lib/stb_image.h"
+#include "../../lib/stb_image.h"
 
 namespace Engine {
     Texture::Texture(unsigned char *rawData, int w, int h, int ch)
