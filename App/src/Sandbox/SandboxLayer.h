@@ -18,8 +18,8 @@ private:
     bool wireFrame = false;
 
     std::shared_ptr<Engine::OrthographicCamera> camera;
-    std::shared_ptr<Engine::Texture> texture;
-    std::shared_ptr<Engine::Texture> texture2;
+    const Engine::Texture* texture;
+    const Engine::Texture* texture2;
     float cameraMoveSpeed = 400.0f;
     float zoomStep = 0.1f;
     float minZoom = 0.1f;

@@ -7,8 +7,8 @@ SandboxLayer::SandboxLayer(std::shared_ptr<Engine::OrthographicCamera> camera)
     : camera(std::move(camera)) {
     targetZoom = this->camera->GetZoom();
 
-    texture = Engine::AssetManager::LoadTexture("noir", "../../../assets/noir.png");
-    texture2 = Engine::AssetManager::LoadTexture("spider", "../../../assets/spider.png");
+    texture = Engine::AssetManager::AddTexture("noir", "../../../assets/noir.png");
+    texture2 = Engine::AssetManager::AddTexture("spider", "../../../assets/spider.png");
 
     glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
 

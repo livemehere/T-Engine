@@ -34,7 +34,7 @@ namespace Engine {
     Application::~Application() {
 
         Renderer2D::Shutdown();
-        AssetManager::Shutdown();
+        AssetManager::ClearTextureAll();
 
         m_layerStack.clear();
         m_window.reset();

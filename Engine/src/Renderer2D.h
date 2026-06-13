@@ -17,19 +17,19 @@ namespace Engine {
         static void Init();
         static void Shutdown();
 
-        static void BeginScene(const Engine::OrthographicCamera& camera);
+        static void BeginScene(const OrthographicCamera& camera);
         static void EndScene();
 
         // solid
         static void DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotationDeg = 0.0f);
 
         // texture
-        static void DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Engine::Texture>& texture, float rotationDeg = 0.0f);
+        static void DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Texture* texture, float rotationDeg = 0.0f);
     private:
         static void StartBatch();
         static void Flush();
 
-        static void m_DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Engine::Texture>& texture, float rotationDeg = 0.0f);
+        static void m_DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Texture* texture, float rotationDeg = 0.0f);
     };
 
 } // Engine

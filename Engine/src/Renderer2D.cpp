@@ -19,17 +19,17 @@ namespace Engine {
 
     struct Renderer2DStorage {
         Renderer2D::Statistics stats;
-        std::shared_ptr<Engine::VertexArray> rectVAO;
-        std::shared_ptr<Engine::VertexBuffer> rectVBO;
-        std::shared_ptr<Engine::Shader> textureShader;
-        std::shared_ptr<Engine::Texture> whiteTexture;
+        std::shared_ptr<VertexArray> rectVAO;
+        std::shared_ptr<VertexBuffer> rectVBO;
+        std::shared_ptr<Shader> textureShader;
+        std::unique_ptr<Texture> whiteTexture;
 
         unsigned int rectIndexCount = 0; // total indices count of current frame
         RectVertex* rectVertexBufferBase = nullptr; // starting point
         RectVertex* rectVertexBufferPtr = nullptr; // current cursor
 
         // texture
-        std::vector<std::shared_ptr<Engine::Texture>> textureSlots;
+        std::vector<const Texture*> textureSlots;
         float textureSlotIndex = 1.0f; // 0 = whiteTexture fixed;
 
     };
@@ -45,19 +45,23 @@ namespace Engine {
     }
 
     void Renderer2D::Init() {
+        if (s_storage != nullptr) {
+            return;
+        }
+
         s_storage = new Renderer2DStorage();
 
         // #### Rect Start ####
-        s_storage->rectVAO = std::make_shared<Engine::VertexArray>();
+        s_storage->rectVAO = std::make_shared<VertexArray>();
 
         // #### VBO START ####
         s_storage->rectVertexBufferBase = new RectVertex[MAX_VERTICES];
-        auto vertexBuffer = std::make_shared<Engine::VertexBuffer>(nullptr, sizeof(RectVertex) * MAX_VERTICES);
+        auto vertexBuffer = std::make_shared<VertexBuffer>(nullptr, sizeof(RectVertex) * MAX_VERTICES);
         vertexBuffer->SetLayout({
-            {Engine::ShaderDataType::Float3, "aPos"},
-            {Engine::ShaderDataType::Float4, "aColor"},
-            {Engine::ShaderDataType::Float2, "aTexCoord"},
-            {Engine::ShaderDataType::Float, "aTextureIndex"},
+            {ShaderDataType::Float3, "aPos"},
+            {ShaderDataType::Float4, "aColor"},
+            {ShaderDataType::Float2, "aTexCoord"},
+            {ShaderDataType::Float, "aTextureIndex"},
         });
         s_storage->rectVBO = vertexBuffer;
         s_storage->rectVAO->AddVertexBuffer(vertexBuffer);
@@ -77,7 +81,7 @@ namespace Engine {
             rectIndices[i + 5] = offset + 0;
             offset +=4;
         }
-        auto indexBuffer = std::make_shared<Engine::IndexBuffer>(rectIndices,MAX_INDICES);
+        auto indexBuffer = std::make_shared<IndexBuffer>(rectIndices,MAX_INDICES);
         s_storage->rectVAO->SetIndexBuffer(indexBuffer);
         delete[] rectIndices;
         // #### EBO END ####
@@ -85,14 +89,14 @@ namespace Engine {
 
         // 1x1 white Texture
         unsigned char whitePixel[] = { 255, 255, 255, 255 };
-        s_storage->whiteTexture = std::make_shared<Texture>(whitePixel, 1,1,4);
+        s_storage->whiteTexture = std::make_unique<Texture>(whitePixel, 1,1,4);
 
         // texture slots
         s_storage->textureSlots.resize(TEXTURE_SAMPLES_COUNT);
-        s_storage->textureSlots[0] = s_storage->whiteTexture;
+        s_storage->textureSlots[0] = s_storage->whiteTexture.get();
 
         // shader
-        s_storage->textureShader = std::make_shared<Engine::Shader>("../../../assets/shaders/Texture.vert","../../../assets/shaders/Texture.frag");
+        s_storage->textureShader = std::make_shared<Shader>("../../../assets/shaders/Texture.vert","../../../assets/shaders/Texture.frag");
         s_storage->textureShader->Bind();
         // #### Rect End ####
 
@@ -107,11 +111,16 @@ namespace Engine {
     }
 
     void Renderer2D::Shutdown() {
+        if (s_storage == nullptr) {
+            return;
+        }
+
         delete[] s_storage->rectVertexBufferBase;
         delete s_storage;
+        s_storage = nullptr;
     }
 
-    void Renderer2D::BeginScene(const Engine::OrthographicCamera &camera) {
+    void Renderer2D::BeginScene(const OrthographicCamera &camera) {
         // shader
         s_storage->textureShader->Bind();
 
@@ -130,12 +139,12 @@ namespace Engine {
     // Rect with solid color
     void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
         float rotationDeg) {
-        m_DrawRect(position, size, color, s_storage->whiteTexture, rotationDeg);
+        m_DrawRect(position, size, color, s_storage->whiteTexture.get(), rotationDeg);
     }
 
     // Rect with texture & color
     void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size,
-         const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
+         const glm::vec4 &color, const Texture* texture, float rotationDeg) {
         m_DrawRect(position, size, color, texture, rotationDeg);
     }
 
@@ -153,7 +162,9 @@ namespace Engine {
         s_storage->rectVBO->SetData(s_storage->rectVertexBufferBase, dataSize);
 
         for (int i=0; i<(int)s_storage->textureSlotIndex; i++) {
-            s_storage->textureSlots[i]->Bind(i);
+            if (s_storage->textureSlots[i] != nullptr) {
+                s_storage->textureSlots[i]->Bind(i);
+            }
         }
 
         s_storage->rectVAO->Bind();
@@ -165,17 +176,20 @@ namespace Engine {
 
     // Rect Base
     void Renderer2D::m_DrawRect(const glm::vec2 &position, const glm::vec2 &size,
-        const glm::vec4 &color, const std::shared_ptr<Engine::Texture> &texture, float rotationDeg) {
+        const glm::vec4 &color, const Texture* texture, float rotationDeg) {
         if (s_storage->rectIndexCount >= MAX_INDICES) {
             Flush();
             StartBatch();
         }
 
         float textureIndex = 0.0f;
+        if (texture == nullptr) {
+            texture = s_storage->whiteTexture.get();
+        }
 
         for (int i = 1; i < TEXTURE_SAMPLES_COUNT; i++) {
             // re-use
-            if (s_storage->textureSlots[i].get() == texture.get()) {
+            if (s_storage->textureSlots[i] == texture) {
                 textureIndex = (float)i;
                 break;
             }
