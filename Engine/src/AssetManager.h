@@ -5,12 +5,11 @@
 namespace Engine {
     class AssetManager {
     public:
-        static std::shared_ptr<Texture> LoadTexture(const std::string& name, const std::string& path);
-        static std::shared_ptr<Texture> LoadTexture(const std::string& path);
-        static std::shared_ptr<Texture> GetTexture(const std::string& name);
-        static bool IsTextureExists(const std::string& name);
-        static void Shutdown();
+        static const Texture* AddTexture(const std::string& name, const std::string& path);
+        static const Texture* GetTexture(const std::string& name);
+        static void ClearTexture(const std::string& name);
+        static void ClearTextureAll();
     private:
-        static std::unordered_map<std::string, std::shared_ptr<Texture>> s_textures;
+        inline static std::unordered_map<std::string, std::unique_ptr<Texture>> s_textures;
     };
 } // Engine

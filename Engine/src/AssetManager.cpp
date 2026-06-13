@@ -1,38 +1,30 @@
 #include "AssetManager.h"
 
 namespace Engine {
-    std::unordered_map<std::string, std::shared_ptr<Texture>> AssetManager::s_textures;
-
-    std::shared_ptr<Texture> AssetManager::LoadTexture(const std::string &name, const std::string &path) {
-        if (IsTextureExists(name)) {
-            return s_textures[name];
+    const Texture* AssetManager::AddTexture(const std::string &name, const std::string &path) {
+        if (const auto found = GetTexture(name)) {
+           return found;
         }
-        auto texture = std::make_shared<Texture>(path);
-        s_textures[name] = texture;
-        return texture;
+        auto texture = std::make_unique<Texture>();
+        if (!texture->LoadFromFile(path)) {
+           return nullptr;
+        }
+        s_textures[name] = std::move(texture);
+        return s_textures[name].get();
     }
 
-    std::shared_ptr<Texture> AssetManager::LoadTexture(const std::string &path) {
-        if (IsTextureExists(path)) {
-            return s_textures[path];
-        }
-        auto texture = std::make_shared<Texture>(path);
-        s_textures[path] = texture;
-        return texture;
-    }
-
-    std::shared_ptr<Texture> AssetManager::GetTexture(const std::string &name) {
-        if (IsTextureExists(name)) {
-            return s_textures[name];
+    const Texture* AssetManager::GetTexture(const std::string &name) {
+        if (const auto it = s_textures.find(name); it != s_textures.end()) {
+            return it->second.get();
         }
         return nullptr;
     }
 
-    bool AssetManager::IsTextureExists(const std::string &name) {
-        return s_textures.contains(name);
+    void AssetManager::ClearTexture(const std::string &name) {
+        s_textures.erase(name);
     }
 
-    void AssetManager::Shutdown() {
+    void AssetManager::ClearTextureAll() {
         s_textures.clear();
     }
 } // Engine
