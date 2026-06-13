@@ -24,10 +24,10 @@ namespace Engine {
         void UnBind() const;
 
     private:
-        unsigned int m_id = 0;
-        int m_width = 0;
-        int m_height = 0;
-        int m_channels = 0;
+        unsigned int m_id;
+        int m_width;
+        int m_height;
+        int m_channels;
         unsigned char* m_data = nullptr;
         void UploadTexture();
     };
