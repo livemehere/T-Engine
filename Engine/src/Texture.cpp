@@ -2,19 +2,6 @@
 #include "../lib/stb_image.h"
 
 namespace Engine {
-    Texture::Texture(const std::string &filepath) {
-        LOG_INFO("[Texture] ctor from file {}", filepath);
-        stbi_set_flip_vertically_on_load(true);
-        m_data = stbi_load(filepath.c_str(), &m_width, &m_height, &m_channels, STBI_rgb_alpha);
-        if (!m_data) {
-            throw std::runtime_error(std::string("[Texture] image load failed: ") + filepath);
-        }
-        LOG_INFO("[Texture] image loaded {}x{} (channels: {})", m_width, m_height, m_channels);
-        UploadTexture();
-        stbi_image_free(m_data);
-        m_data = nullptr;
-    }
-
     Texture::Texture(unsigned char *rawData, int w, int h, int ch)
         : m_id(0), m_width(w), m_height(h), m_channels(ch), m_data(rawData) {
         if (m_data == nullptr) {
@@ -36,6 +23,20 @@ namespace Engine {
             LOG_INFO("[Texture] VRAM data free (id: {})", m_id);
             m_id = 0;
         }
+    }
+
+    bool Texture::LoadFromFile(const std::string &filepath) {
+        stbi_set_flip_vertically_on_load(true);
+        m_data = stbi_load(filepath.c_str(), &m_width, &m_height, &m_channels, STBI_rgb_alpha);
+        if (!m_data) {
+            LOG_ERROR("[Texture] load failed : {}", filepath);
+            return false;
+        }
+        LOG_INFO("[Texture] load success {}x{} (channels: {})", m_width, m_height, m_channels);
+        UploadTexture();
+        stbi_image_free(m_data);
+        m_data = nullptr;
+        return true;
     }
 
     void Texture::Bind(unsigned int slot) const {

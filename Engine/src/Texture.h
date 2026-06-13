@@ -10,12 +10,11 @@
 namespace Engine {
     class Texture {
     public:
-        Texture(const std::string& filepath);
+        Texture() = default;
         Texture(unsigned char *rawData, int w, int h, int ch);
         ~Texture();
 
-        static std::shared_ptr<Texture> GetWhiteTexture();
-
+        bool LoadFromFile(const std::string& filepath);
         unsigned int GetId() const { return m_id; }
         int GetWidth() const { return m_width; }
         int GetHeight() const { return m_height; }
