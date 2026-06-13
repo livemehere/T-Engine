@@ -1,7 +1,7 @@
 #include "Renderer2D.h"
 
 #include "Resource/Shader.h"
-#include "VertexArray.h"
+#include "OpenGL/VertexArray.h"
 
 namespace Engine {
 

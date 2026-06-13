@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineCommon.h"
+#include "../EngineCommon.h"
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 
