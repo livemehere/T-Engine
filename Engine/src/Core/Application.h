@@ -2,10 +2,10 @@
 
 #include <filesystem>
 
-#include "Layer.h"
 #include "Window.h"
-#include "LayerStack.h"
-#include "GuiLayer.h"
+#include "../Layer/Layer.h"
+#include "../Layer/LayerStack.h"
+#include "../Layer/GuiLayer.h"
 
 namespace Engine {
     struct AppSpec {

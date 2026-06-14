@@ -4,7 +4,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "Application.h"
+#include "../Core/Application.h"
 
 namespace Engine {
     void GuiLayer::OnAttach() {
