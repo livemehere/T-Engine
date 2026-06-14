@@ -32,6 +32,9 @@ namespace Engine {
     }
 
     Application::~Application() {
+        for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it){
+            (*it)->OnDetach();
+        }
 
         Renderer2D::Shutdown();
         AssetManager::ClearTextureAll();
@@ -42,7 +45,7 @@ namespace Engine {
         glfwTerminate();
     }
 
-    void Application::Run() {
+    void Application::Run() const {
 
         Renderer2D::Init();
 

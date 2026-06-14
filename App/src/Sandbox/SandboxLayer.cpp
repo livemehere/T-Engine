@@ -3,8 +3,8 @@
 #include "Resource/AssetManager.h"
 #include "Renderer2D.h"
 
-SandboxLayer::SandboxLayer(std::shared_ptr<Engine::OrthographicCamera> camera)
-    : camera(std::move(camera)) {
+SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::OrthographicCamera> camera)
+    : Layer(name), camera(std::move(camera)) {
     targetZoom = this->camera->GetZoom();
 
     texture = Engine::AssetManager::AddTexture("noir", "../../../assets/noir.png");
@@ -83,4 +83,12 @@ void SandboxLayer::OnRender() {
     }
 
     Engine::Renderer2D::EndScene();
+}
+
+void SandboxLayer::OnAttach() {
+    LOG_INFO("Attach Sandbox Layer");
+}
+
+void SandboxLayer::OnDetach() {
+    LOG_INFO("Detach Sandbox Layer");
 }

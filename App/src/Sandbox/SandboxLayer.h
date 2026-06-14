@@ -3,16 +3,18 @@
 
 #include "OrthographicCamera.h"
 #include "Resource/Texture.h"
-#include "Layer.h"
+#include "../../../Engine/src/Core/Layer.h"
 #include "Application.h"
 
 class SandboxLayer : public Engine::Layer {
 public:
-    SandboxLayer(std::shared_ptr<Engine::OrthographicCamera> camera);
+    SandboxLayer(const std::string& name, std::shared_ptr<Engine::OrthographicCamera> camera);
     ~SandboxLayer() override = default;
 
     void OnUpdate(float dt) override;
     void OnRender() override;
+    void OnAttach() override;
+    void OnDetach() override;
 
 private:
     bool wireFrame = false;

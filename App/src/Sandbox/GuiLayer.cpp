@@ -7,8 +7,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-GuiLayer::GuiLayer(std::shared_ptr<Engine::OrthographicCamera> camera)
-    : camera(std::move(camera)) {
+GuiLayer::GuiLayer(const std::string& name, std::shared_ptr<Engine::OrthographicCamera> camera)
+    :Layer(name), camera(std::move(camera)) {
     auto window = Engine::Application::Get().GetWindow();
 
     IMGUI_CHECKVERSION();
@@ -63,4 +63,12 @@ void GuiLayer::OnRender() {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void GuiLayer::OnAttach() {
+    LOG_INFO("Attach GUI Layer");
+}
+
+void GuiLayer::OnDetach() {
+    LOG_INFO("Detach GUI Layer");
 }
