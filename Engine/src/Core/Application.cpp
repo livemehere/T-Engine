@@ -38,9 +38,7 @@ namespace Engine {
     }
 
     Application::~Application() {
-        for (auto it = m_layerStack.rbegin(); it != m_layerStack.rend(); ++it){
-            (*it)->OnDetach();
-        }
+        m_layerStack.Clear();
 
         Renderer2D::Shutdown();
         AssetManager::ClearTextureAll();

@@ -1,10 +1,10 @@
 #include "LayerStack.h"
 
+#include <ranges>
+
 namespace Engine {
     LayerStack::~LayerStack() {
-        for (const auto& layer : m_layers) {
-            layer->OnDetach();
-        }
+       Clear();
     }
 
     void LayerStack::PopLayer(Layer *layer) {
@@ -41,5 +41,14 @@ namespace Engine {
             m_layers.erase(it);
         }
         m_pendingCommands.clear();
+    }
+
+    void LayerStack::Clear() {
+        for (const auto& layer : m_layers | std::ranges::views::reverse) {
+            layer->OnDetach();
+        }
+        m_layers.clear();
+        m_pendingCommands.clear();
+        m_layerInsertIndex = 0;
     }
 }

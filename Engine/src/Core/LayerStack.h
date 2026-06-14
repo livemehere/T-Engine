@@ -35,6 +35,7 @@ namespace Engine {
         void PopLayer(Layer* layer);
         void PopOverlay(Layer* layer);
         void PlushPendingCommands();
+        void Clear();
 
         auto begin() const { return m_layers.begin(); }
         auto end() const { return m_layers.end(); }
