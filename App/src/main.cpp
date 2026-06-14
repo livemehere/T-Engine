@@ -6,7 +6,7 @@
 
 int main() {
     try {
-        Engine::AppSpec appSpec{
+        const Engine::AppSpec appSpec{
             .windowSpec = {
                 .title = "Sample Window",
                 .width = 1920,
@@ -15,7 +15,7 @@ int main() {
         };
 
         Engine::Application app{appSpec};
-        auto* window = app.GetWindow();
+        const auto* window = app.GetWindow();
         auto camera = std::make_shared<Engine::OrthographicCamera>(
             0.0f,
             static_cast<float>(window->GetWidth()),
@@ -23,8 +23,9 @@ int main() {
             static_cast<float>(window->GetHeight())
         );
 
-        app.PushLayer<SandboxLayer>(camera);
-        app.PushLayer<GuiLayer>(camera);
+        app.PushLayer<SandboxLayer>("Sandbox", camera);
+        app.PushLayer<GuiLayer>("GUI",camera);
+
         app.Run();
 
         return 0;

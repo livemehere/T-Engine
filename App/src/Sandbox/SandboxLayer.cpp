@@ -83,6 +83,11 @@ void SandboxLayer::OnRender() {
     }
 
     Engine::Renderer2D::EndScene();
+
+    if (rotationDeg == 100.0f) {
+        Engine::Application::Get().PopLayer(this);
+        LOG_INFO("pop!");
+    }
 }
 
 void SandboxLayer::OnAttach() {
