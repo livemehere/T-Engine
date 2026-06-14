@@ -2,6 +2,7 @@
 
 #include "Core/Layer.h"
 #include "Core/Window.h"
+#include "Core/LayerStack.h"
 
 namespace Engine {
     struct AppSpec {
@@ -18,7 +19,7 @@ namespace Engine {
         Application(const Application&&) = delete;
         Application& operator=(Application&&) = delete;
 
-        void Run() const;
+        void Run();
 
         static Application& Get() {
             assert(s_instance && "[Application] instance is null");
@@ -28,17 +29,24 @@ namespace Engine {
 
         template<typename TLayer, typename ... Args>
         requires(std::is_base_of_v<Layer, TLayer>)
-        void PushLayer(Args&&... args) {
-            auto layer = std::make_unique<TLayer>(std::forward<Args>(args)...);
-            layer->OnAttach();
-            m_layerStack.push_back(std::move(layer));
+        TLayer* PushLayer(Args&&... args) {
+            TLayer* layer = m_layerStack.PushLayer<TLayer>(std::forward<Args>(args)...);
+            return layer;
+        }
+        template<typename TLayer, typename ... Args>
+        requires(std::is_base_of_v<Layer, TLayer>)
+        TLayer* PushOverlay(Args&&... args) {
+            TLayer* layer = m_layerStack.PushOverlay<TLayer>(std::forward<Args>(args)...);
+            return layer;
         }
 
+        void PopLayer(Layer* layer);
+        void PopOverlay(Layer* layer);
     private:
         static Application* s_instance;
 
         std::unique_ptr<Window> m_window;
-        std::vector<std::unique_ptr<Layer>> m_layerStack;
+        LayerStack m_layerStack;
 
         static void ErrorCallback(int error, const char *description);
     };

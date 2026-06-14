@@ -1,11 +1,16 @@
 #include "Application.h"
-
-#include <stdexcept>
-
 #include "Resource/AssetManager.h"
 #include "Renderer2D.h"
 
 namespace Engine {
+    void Application::PopLayer(Layer *layer) {
+        m_layerStack.PopLayer(layer);
+    }
+
+    void Application::PopOverlay(Layer *layer) {
+        m_layerStack.PopOverlay(layer);
+    }
+
     Application* Application::s_instance = nullptr;
 
     Application::Application(const AppSpec &spec) {
@@ -39,13 +44,12 @@ namespace Engine {
         Renderer2D::Shutdown();
         AssetManager::ClearTextureAll();
 
-        m_layerStack.clear();
         m_window.reset();
         s_instance = nullptr;
         glfwTerminate();
     }
 
-    void Application::Run() const {
+    void Application::Run() {
 
         Renderer2D::Init();
 
@@ -67,6 +71,8 @@ namespace Engine {
             for (const auto& layer : m_layerStack) {
                 layer->OnRender();
             }
+
+            m_layerStack.PlushPendingCommands();
 
             m_window->Update();
         }
