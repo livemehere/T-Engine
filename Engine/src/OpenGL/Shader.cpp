@@ -3,8 +3,8 @@
 
 namespace Engine {
     Shader::Shader(const std::string &vertexSrcPath, const std::string &fragmentSrcPath) {
-        std::string vertexSrc = ReadFile(vertexSrcPath);
-        std::string fragmentSrc = ReadFile(fragmentSrcPath);
+        const std::string vertexSrc = ReadFile(vertexSrcPath);
+        const std::string fragmentSrc = ReadFile(fragmentSrcPath);
         CompileProgram(vertexSrc, fragmentSrc);
     }
 
@@ -38,11 +38,11 @@ namespace Engine {
         return result;
     }
 
-    GLuint Shader::CompileShader(GLuint type, const std::string &source) {
-        std::string typeStr = type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT";
+    GLuint Shader::CompileShader(const GLuint type, const std::string &source) {
+        const std::string typeStr = type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT";
         const char* sourcePtr = source.c_str();
 
-        GLuint shader = glCreateShader(type);
+        const GLuint shader = glCreateShader(type);
         if (shader == 0) {
             throw std::runtime_error("[Shader] Failed to create " + typeStr + " shader object");
         }
@@ -64,8 +64,8 @@ namespace Engine {
     }
 
     void Shader::CompileProgram(const std::string &vertexSrc, const std::string &fragmentSrc) {
-        GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexSrc);
-        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentSrc);
+        const GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexSrc);
+        const GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentSrc);
 
         int success;
         char infoLog[512];
