@@ -15,16 +15,16 @@ namespace Engine {
         ~Texture();
 
         bool LoadFromFile(const std::string& filepath);
-        unsigned int GetId() const { return m_id; }
+        GLuint GetId() const { return m_id; }
         int GetWidth() const { return m_width; }
         int GetHeight() const { return m_height; }
         int GetChannels() const { return m_channels; }
 
-        void Bind(unsigned int slot = 0) const;
+        void Bind(GLuint slot = 0) const;
         void UnBind() const;
 
     private:
-        unsigned int m_id;
+        GLuint m_id;
         int m_width;
         int m_height;
         int m_channels;
