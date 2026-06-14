@@ -32,4 +32,4 @@ namespace Engine {
         static void m_DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Texture* texture, float rotationDeg = 0.0f);
     };
 
-} // Engine
+}
