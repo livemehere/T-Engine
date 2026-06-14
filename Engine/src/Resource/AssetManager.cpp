@@ -1,11 +1,12 @@
 #include "AssetManager.h"
 
 namespace Engine {
-    const Texture* AssetManager::AddTexture(const std::string &name, const std::string &path) {
+    const Texture* AssetManager::AddTexture(const std::string &name, const std::string &relativePath) {
         if (const auto found = GetTexture(name)) {
            return found;
         }
         auto texture = std::make_unique<Texture>();
+        auto path = ResolvePath(relativePath);
         if (!texture->LoadFromFile(path)) {
            return nullptr;
         }
@@ -26,5 +27,17 @@ namespace Engine {
 
     void AssetManager::ClearTextureAll() {
         s_textures.clear();
+    }
+
+    void AssetManager::SetAssetRoot(const std::filesystem::path &rootPath) {
+        s_rootPath = rootPath;
+    }
+
+    std::filesystem::path AssetManager::ResolvePath(const std::filesystem::path &relativePath) {
+        if (relativePath.is_absolute()) {
+            return relativePath;
+        }
+
+        return s_rootPath / relativePath;
     }
 }

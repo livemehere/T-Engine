@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+
 #include "Layer.h"
 #include "Window.h"
 #include "LayerStack.h"
@@ -7,6 +9,7 @@
 namespace Engine {
     struct AppSpec {
         WindowSpec windowSpec;
+        std::filesystem::path assetRoot;
     };
 
     class Application {

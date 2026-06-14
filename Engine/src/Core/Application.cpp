@@ -14,6 +14,7 @@ namespace Engine {
     Application* Application::s_instance = nullptr;
 
     Application::Application(const AppSpec &spec) {
+        AssetManager::SetAssetRoot(spec.assetRoot);
 
         if (s_instance != nullptr) {
             throw std::runtime_error("Cannot instantiate Application more than once");
