@@ -1,6 +1,5 @@
 #include "Window.h"
 
-
 namespace Engine {
     Window::Window(const WindowSpec& spec) {
         if (spec.width <= 0 || spec.height <= 0) {
