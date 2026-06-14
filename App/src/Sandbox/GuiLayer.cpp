@@ -1,7 +1,7 @@
 #include "GuiLayer.h"
 
 #include "Renderer2D.h"
-#include "Application.h"
+#include "Core/Application.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>

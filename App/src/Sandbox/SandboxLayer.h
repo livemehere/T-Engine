@@ -3,8 +3,8 @@
 
 #include "OrthographicCamera.h"
 #include "Resource/Texture.h"
-#include "../../../Engine/src/Core/Layer.h"
-#include "Application.h"
+#include "Core/Layer.h"
+#include "Core/Application.h"
 
 class SandboxLayer : public Engine::Layer {
 public:

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Core/Layer.h"
-#include "Core/Window.h"
-#include "Core/LayerStack.h"
+#include "Layer.h"
+#include "Window.h"
+#include "LayerStack.h"
 
 namespace Engine {
     struct AppSpec {
