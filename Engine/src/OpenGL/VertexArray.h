@@ -11,7 +11,7 @@ namespace Engine {
         ~VertexArray();
 
         VertexArray(const VertexArray&) = delete;
-        VertexArray& operator=(const VertexArray) = delete;
+        VertexArray& operator=(const VertexArray&) = delete;
 
         void Bind() const;
         void UnBind() const;
