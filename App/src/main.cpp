@@ -11,7 +11,8 @@ int main() {
                 .title = "Sample Window",
                 .width = 1920,
                 .height = 1080
-            }
+            },
+            .assetRoot = "../../../assets"
         };
 
         Engine::Application app{appSpec};

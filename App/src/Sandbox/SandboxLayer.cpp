@@ -7,8 +7,8 @@ SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::Orth
     : Layer(name), camera(std::move(camera)) {
     targetZoom = this->camera->GetZoom();
 
-    texture = Engine::AssetManager::AddTexture("noir", "../../../assets/noir.png");
-    texture2 = Engine::AssetManager::AddTexture("spider", "../../../assets/spider.png");
+    texture = Engine::AssetManager::AddTexture("noir", "textures/noir.png");
+    texture2 = Engine::AssetManager::AddTexture("spider", "textures/spider.png");
 
     glPolygonMode(GL_FRONT_AND_BACK, wireFrame ? GL_LINE : GL_FILL);
 
@@ -84,10 +84,6 @@ void SandboxLayer::OnRender() {
 
     Engine::Renderer2D::EndScene();
 
-    if (rotationDeg == 100.0f) {
-        Engine::Application::Get().PopLayer(this);
-        LOG_INFO("pop!");
-    }
 }
 
 void SandboxLayer::OnAttach() {
