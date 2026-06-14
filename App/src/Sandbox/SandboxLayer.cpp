@@ -1,6 +1,6 @@
 #include "SandboxLayer.h"
 
-#include "../../../Engine/src/Resource/AssetManager.h"
+#include "Resource/AssetManager.h"
 #include "Renderer2D.h"
 
 SandboxLayer::SandboxLayer(std::shared_ptr<Engine::OrthographicCamera> camera)

@@ -2,7 +2,7 @@
 
 
 #include "OrthographicCamera.h"
-#include "../../../Engine/src/Resource/Texture.h"
+#include "Resource/Texture.h"
 #include "Layer.h"
 #include "Application.h"
 
