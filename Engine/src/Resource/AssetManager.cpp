@@ -27,4 +27,4 @@ namespace Engine {
     void AssetManager::ClearTextureAll() {
         s_textures.clear();
     }
-} // Engine
+}

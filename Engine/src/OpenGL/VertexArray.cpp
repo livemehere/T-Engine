@@ -59,8 +59,8 @@ namespace Engine {
             glEnableVertexAttribArray(attributeIndex);
             glVertexAttribPointer(
                 attributeIndex,
-                element.GetComponentCount(),
-                GL_FLOAT,
+                GetShaderDataTypeCount(element.type),
+                ShaderDataTypeToOpenGLBaseType(element.type),
                 element.normalized ? GL_TRUE : GL_FALSE,
                 layout.GetStride(),
                 reinterpret_cast<void *>(element.offset));

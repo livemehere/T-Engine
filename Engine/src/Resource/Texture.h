@@ -14,6 +14,9 @@ namespace Engine {
         Texture(unsigned char *rawData, int w, int h, int ch);
         ~Texture();
 
+        Texture(const Texture&) = delete;
+        Texture& operator=(const Texture&) = delete;
+
         bool LoadFromFile(const std::string& filepath);
         GLuint GetId() const { return m_id; }
         int GetWidth() const { return m_width; }

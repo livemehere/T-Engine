@@ -98,6 +98,9 @@ namespace Engine {
         VertexBuffer(const RectVertex* vertices, GLuint size);
         ~VertexBuffer();
 
+        VertexBuffer(const VertexBuffer&) = delete;
+        VertexBuffer& operator=(const VertexBuffer&) = delete;
+
         GLuint GetId() const { return m_id; }
         void Bind() const;
         void UnBind() const;

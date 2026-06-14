@@ -12,7 +12,7 @@ namespace Engine {
         glDeleteProgram(m_id);
     }
 
-    void Shader::Bind() {
+    void Shader::Bind() const {
         glUseProgram(m_id);
     }
 
@@ -38,11 +38,11 @@ namespace Engine {
         return result;
     }
 
-    unsigned int Shader::CompileShader(unsigned int type, const std::string &source) {
+    GLuint Shader::CompileShader(GLuint type, const std::string &source) {
         std::string typeStr = type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT";
         const char* sourcePtr = source.c_str();
 
-        unsigned int shader = glCreateShader(type);
+        GLuint shader = glCreateShader(type);
         if (shader == 0) {
             throw std::runtime_error("[Shader] Failed to create " + typeStr + " shader object");
         }
@@ -64,8 +64,8 @@ namespace Engine {
     }
 
     void Shader::CompileProgram(const std::string &vertexSrc, const std::string &fragmentSrc) {
-        unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexSrc);
-        unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentSrc);
+        GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexSrc);
+        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentSrc);
 
         int success;
         char infoLog[512];

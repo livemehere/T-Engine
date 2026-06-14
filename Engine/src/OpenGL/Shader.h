@@ -6,15 +6,19 @@ namespace Engine {
         Shader(const std::string& vertexSrcPath, const std::string& fragmentSrcPath);
         ~Shader();
 
-        unsigned int GetId() const { return m_id; }
-        void Bind();
+        Shader(const Shader&) = delete;
+        Shader& operator=(const Shader&) = delete;
+
+        GLuint GetId() const { return m_id; }
+        void Bind() const;
         void UnBind();
 
     private:
-        unsigned int m_id = 0;
-        std::string ReadFile(const std::string& filePath);
+        GLuint m_id = 0;
 
-        unsigned int CompileShader(unsigned int type, const std::string &source);
+        static std::string ReadFile(const std::string& filePath);
+        static GLuint CompileShader(GLuint type, const std::string &source);
+
         void CompileProgram(const std::string& vertexSrc, const std::string& fragmentSrc);
     };
 }

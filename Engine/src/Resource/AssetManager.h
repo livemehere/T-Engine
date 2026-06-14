@@ -12,4 +12,4 @@ namespace Engine {
     private:
         inline static std::unordered_map<std::string, std::unique_ptr<Texture>> s_textures;
     };
-} // Engine
+}
