@@ -20,7 +20,6 @@ namespace Engine {
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         #endif
 
-
         m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
 
         if (!m_window) {
@@ -38,13 +37,16 @@ namespace Engine {
         LogOpenGLInfo();
 
         glfwSetWindowUserPointer(m_window, this);
+        glfwSwapInterval(m_vsync ? 1 : 0);
 
-        // for device pixel ratio
+        // update initial viewport
         glfwGetFramebufferSize(m_window, &m_frameBufferWidth, &m_frameBufferHeight);
         glViewport(0, 0, m_frameBufferWidth, m_frameBufferHeight);
+
+        // callbacks
+        glfwSetWindowSizeCallback(m_window, WindowSizeCallback);
         glfwSetFramebufferSizeCallback(m_window, FrameBufferSizeCallback);
         glfwSetScrollCallback(m_window, ScrollCallback);
-        glfwSwapInterval(m_vsync ? 1 : 0);
     }
 
     Window::~Window() {
@@ -64,12 +66,19 @@ namespace Engine {
         return scrollYOffset;
     }
 
+    void Window::WindowSizeCallback(GLFWwindow* window, int width, int height) {
+        const auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        self->m_width = width;
+        self->m_height = height;
+        LOG_INFO("size change {}x{}",self->m_width, self->m_height);
+    }
+
     void Window::FrameBufferSizeCallback(GLFWwindow *window, int width, int height) {
         const auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
         glViewport(0,0,width,height);
-        LOG_INFO("Viewport Changed : {}x{}",width,height);
         self->m_frameBufferWidth = width;
         self->m_frameBufferHeight = height;
+        LOG_INFO("Viewport Changed : {}x{}",self->m_frameBufferWidth,self->m_frameBufferHeight);
     }
 
     void Window::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
