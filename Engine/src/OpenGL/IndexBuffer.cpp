@@ -1,7 +1,7 @@
 #include "IndexBuffer.h"
 
 namespace Engine {
-    IndexBuffer::IndexBuffer(const unsigned int *indices, const unsigned int count) {
+    IndexBuffer::IndexBuffer(const GLuint *indices, const GLuint count) {
         if (indices == nullptr) {
             throw std::runtime_error("IndexBuffer data cannot be null");
         }
@@ -17,7 +17,7 @@ namespace Engine {
         }
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * count, indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * count, indices, GL_STATIC_DRAW);
         LOG_INFO("[IndexBuffer] ctor (id: {}, count: {})", m_id, m_count);
     }
 
