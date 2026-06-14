@@ -1,7 +1,7 @@
 #include "VertexBuffer.h"
 
 namespace Engine {
-    VertexBuffer::VertexBuffer(const Engine::RectVertex *vertices, unsigned int size) {
+    VertexBuffer::VertexBuffer(const RectVertex *vertices, unsigned int size) {
 
         // NOTE: enable nullptr for batch rendering
         // if (vertices == nullptr) {
