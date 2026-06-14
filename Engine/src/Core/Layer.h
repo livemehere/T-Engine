@@ -12,6 +12,7 @@ namespace Engine {
         virtual void OnDetach() {}
         virtual void OnUpdate(float dt) {}
         virtual void OnRender(){}
+        virtual void OnGuiRender(){}
 
         const std::string& GetName() { return m_name; }
     protected:

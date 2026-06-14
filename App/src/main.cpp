@@ -1,7 +1,6 @@
 #include "Core/Application.h"
 
 #include "OrthographicCamera.h"
-#include "Sandbox/GuiLayer.h"
 #include "Sandbox/SandboxLayer.h"
 
 int main() {
@@ -25,7 +24,6 @@ int main() {
         );
 
         app.PushLayer<SandboxLayer>("Sandbox", camera);
-        app.PushLayer<GuiLayer>("GUI",camera);
 
         app.Run();
 

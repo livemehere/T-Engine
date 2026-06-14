@@ -1,5 +1,7 @@
 #include "SandboxLayer.h"
 
+#include <imgui.h>
+
 #include "Resource/AssetManager.h"
 #include "Renderer2D.h"
 
@@ -92,4 +94,35 @@ void SandboxLayer::OnAttach() {
 
 void SandboxLayer::OnDetach() {
     LOG_INFO("Detach Sandbox Layer");
+}
+
+void SandboxLayer::OnGuiRender() {
+    auto window = Engine::Application::Get().GetWindow();
+    auto* handle = window->GetHandle();
+
+    auto screenWidth = static_cast<float>(window->GetWidth());
+    auto screenHeight = static_cast<float>(window->GetHeight());
+
+    double screenX = 0.0;
+    double screenY = 0.0;
+    glfwGetCursorPos(handle, &screenX, &screenY);
+
+    const glm::vec3 worldCursor = camera->ScreenToWorld({screenX, screenY}, {screenWidth, screenHeight});
+
+    ImGui::Begin("Mouse");
+    ImGui::Text("World : %.1f x %.1f", worldCursor.x, worldCursor.y);
+    ImGui::End();
+
+    ImDrawList* drawList = ImGui::GetForegroundDrawList();
+    drawList->AddCircle(ImVec2(screenX, screenY), 10.0f * camera->GetZoom(), IM_COL32(0, 255, 0, 255), 232, 2.0f);
+
+    ImGui::Begin("Stats");
+    ImGui::SetWindowFontScale(1.5f);
+    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+
+    auto stats = Engine::Renderer2D::GetStats();
+    ImGui::Text("Draw Calls: %d", stats.drawCalls);
+    ImGui::Text("Rect Count: %d", stats.rectCount);
+    ImGui::SetWindowFontScale(1.0f);
+    ImGui::End();
 }

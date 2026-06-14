@@ -15,6 +15,7 @@ public:
     void OnRender() override;
     void OnAttach() override;
     void OnDetach() override;
+    void OnGuiRender() override;
 
 private:
     bool wireFrame = false;

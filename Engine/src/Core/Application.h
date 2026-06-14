@@ -5,6 +5,7 @@
 #include "Layer.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "GuiLayer.h"
 
 namespace Engine {
     struct AppSpec {
@@ -49,6 +50,7 @@ namespace Engine {
         static Application* s_instance;
 
         std::unique_ptr<Window> m_window;
+        GuiLayer m_guiLayer;
         LayerStack m_layerStack;
 
         static void ErrorCallback(int error, const char *description);

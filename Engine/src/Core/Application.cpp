@@ -35,6 +35,8 @@ namespace Engine {
             glfwTerminate();
             throw;
         }
+
+        PushOverlay<GuiLayer>();
     }
 
     Application::~Application() {
@@ -70,6 +72,13 @@ namespace Engine {
             for (const auto& layer : m_layerStack) {
                 layer->OnRender();
             }
+
+
+            m_guiLayer.Begin();
+            for (const auto& layer : m_layerStack) {
+                layer->OnGuiRender();
+            }
+            m_guiLayer.End();
 
             m_layerStack.PlushPendingCommands();
 
