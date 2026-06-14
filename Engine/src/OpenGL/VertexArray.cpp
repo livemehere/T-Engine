@@ -4,46 +4,38 @@ namespace Engine {
     VertexArray::VertexArray() {
         glGenVertexArrays(1, &m_id);
         if (m_id == 0) {
-            throw std::runtime_error("Failed to create VertexArray");
+            throw std::runtime_error("[VertexArray] Failed to create VertexArray");
         }
         glBindVertexArray(m_id);
+        LOG_INFO("[VertexArray] {} Created", m_id);
     }
 
     VertexArray::~VertexArray() {
         glDeleteVertexArrays(1,&m_id);
+        LOG_INFO("[VertexArray] {} Deleted", m_id);
     }
 
     void VertexArray::Bind() const {
         if (m_indexBuffer == nullptr) {
-            throw std::runtime_error("VertexArray requires an IndexBuffer before binding");
+            throw std::runtime_error("[VertexArray] requires an IndexBuffer before binding");
         }
-
         glBindVertexArray(m_id);
-        for (const auto& vb : m_vertexBuffers) {
-            vb->Bind();
-        }
-        m_indexBuffer->Bind();
     }
 
     void VertexArray::UnBind() const {
         if (m_indexBuffer == nullptr) {
-            throw std::runtime_error("VertexArray requires an IndexBuffer before unbinding");
+            throw std::runtime_error("[VertexArray] requires an IndexBuffer before unbinding");
         }
-
-        for (const auto& vb : m_vertexBuffers) {
-            vb->UnBind();
-        }
-        m_indexBuffer->UnBind();
         glBindVertexArray(0);
     }
 
-    void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer> &vertexBuffer) {
+    void VertexArray::AddVertexBuffer(std::shared_ptr<VertexBuffer> vertexBuffer) {
         if (vertexBuffer == nullptr) {
-            throw std::runtime_error("Cannot add null VertexBuffer");
+            throw std::runtime_error("[VertexArray] Cannot add null VertexBuffer");
         }
 
         if (vertexBuffer->GetLayout().GetElements().empty()) {
-            throw std::runtime_error("VertexBuffer has empty elements");
+            throw std::runtime_error("[VertexArray] VertexBuffer has empty elements");
         }
 
         glBindVertexArray(m_id);
@@ -67,17 +59,16 @@ namespace Engine {
             attributeIndex++;
         }
 
-        m_vertexBuffers.push_back(vertexBuffer);
+        m_vertexBuffers.push_back(std::move(vertexBuffer));
     }
 
-    void VertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexBuffer) {
+    void VertexArray::SetIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer) {
         if (indexBuffer == nullptr) {
-            throw std::runtime_error("Cannot set null IndexBuffer");
+            throw std::runtime_error("[VertexArray] Cannot set null IndexBuffer");
         }
 
         glBindVertexArray(m_id);
         indexBuffer->Bind();
-
-        m_indexBuffer = indexBuffer;
+        m_indexBuffer = std::move(indexBuffer);
     }
 }
