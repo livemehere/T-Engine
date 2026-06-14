@@ -56,6 +56,9 @@ namespace Engine {
 
         double lastTime = glfwGetTime();
 
+        // NOTE: 2D zIndex handle by transform z sort, not use GL_DEPTH_TEST, this cause PNG Alpha clipping bug.
+        // glEnable(GL_DEPTH_TEST);
+
         while (!m_window->ShouldClose()) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glfwPollEvents();

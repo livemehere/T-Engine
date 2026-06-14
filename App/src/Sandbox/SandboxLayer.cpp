@@ -4,6 +4,7 @@
 
 #include "Resource/AssetManager.h"
 #include "Renderer2D.h"
+#include "Camera/OrthographicCamera.h"
 
 SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::OrthographicCamera> camera)
     : Layer(name), camera(std::move(camera)) {
@@ -74,7 +75,7 @@ void SandboxLayer::OnRender() {
     const int step = static_cast<int>(size.x) + gap;
     rotationDeg += 1.0f;
 
-    Engine::Renderer2D::BeginScene(camera->GetViewProjectionMatrix());
+    Engine::Renderer2D::BeginScene(camera->GetViewProjection());
 
     for (int x = 0; x < width; x += step) {
         for (int y = 0; y < height; y += step) {

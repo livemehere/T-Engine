@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EngineCommon.h"
-#include "OrthographicCamera.h"
 #include "Resource/Texture.h"
 
 namespace Engine {

@@ -1,6 +1,6 @@
 #include "Core/Application.h"
 
-#include "OrthographicCamera.h"
+#include "Camera/OrthographicCamera.h"
 #include "Sandbox/SandboxLayer.h"
 
 int main() {

@@ -1,7 +1,6 @@
 #pragma once
 
-
-#include "OrthographicCamera.h"
+#include "Camera/OrthographicCamera.h"
 #include "Resource/Texture.h"
 #include "Core/Layer.h"
 #include "Core/Application.h"
