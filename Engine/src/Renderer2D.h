@@ -17,7 +17,7 @@ namespace Engine {
         static void Init();
         static void Shutdown();
 
-        static void BeginScene(const OrthographicCamera& camera);
+        static void BeginScene(const glm::mat4& viewProjection);
         static void EndScene();
 
         // solid

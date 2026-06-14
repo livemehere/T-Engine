@@ -120,13 +120,13 @@ namespace Engine {
         s_storage = nullptr;
     }
 
-    void Renderer2D::BeginScene(const OrthographicCamera &camera) {
+    void Renderer2D::BeginScene(const glm::mat4& viewProjection) {
         // shader
         s_storage->textureShader->Bind();
 
         // camera
         int vpLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uViewProjection");
-        glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(camera.GetViewProjectionMatrix()));
+        glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
 
         StartBatch();
     }

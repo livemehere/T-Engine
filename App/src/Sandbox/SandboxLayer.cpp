@@ -74,7 +74,7 @@ void SandboxLayer::OnRender() {
     const int step = static_cast<int>(size.x) + gap;
     rotationDeg += 1.0f;
 
-    Engine::Renderer2D::BeginScene(*camera);
+    Engine::Renderer2D::BeginScene(camera->GetViewProjectionMatrix());
 
     for (int x = 0; x < width; x += step) {
         for (int y = 0; y < height; y += step) {
