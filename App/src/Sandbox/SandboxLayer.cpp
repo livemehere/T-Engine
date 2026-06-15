@@ -5,6 +5,7 @@
 #include "Resource/AssetManager.h"
 #include "Renderer2D.h"
 #include "Camera/OrthographicCamera.h"
+#include "Core/Input.h"
 
 SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::OrthographicCamera> camera)
     : Layer(name), camera(std::move(camera)) {
@@ -18,42 +19,35 @@ SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::Orth
 }
 
 void SandboxLayer::OnUpdate(float dt) {
-    auto window = Engine::Application::Get().GetWindow();
-    auto* handle = window->GetHandle();
-
     const float currentZoom = camera->GetZoom();
 
     glm::vec3 position = camera->GetPosition();
     const float moveAmount = cameraMoveSpeed * dt / currentZoom;
 
-    if (glfwGetKey(handle, GLFW_KEY_A) == GLFW_PRESS) {
+    if (Engine::Input::IsKeyPressed(Engine::KeyCode::A)) {
         position.x -= moveAmount;
     }
-    if (glfwGetKey(handle, GLFW_KEY_D) == GLFW_PRESS) {
+    if (Engine::Input::IsKeyPressed(Engine::KeyCode::D)) {
         position.x += moveAmount;
     }
-    if (glfwGetKey(handle, GLFW_KEY_S) == GLFW_PRESS) {
+    if (Engine::Input::IsKeyPressed(Engine::KeyCode::S)) {
         position.y -= moveAmount;
     }
-    if (glfwGetKey(handle, GLFW_KEY_W) == GLFW_PRESS) {
+    if (Engine::Input::IsKeyPressed(Engine::KeyCode::W)) {
         position.y += moveAmount;
     }
 
     camera->SetPosition(position);
 
-    const float scrollYOffset = window->ConsumeScrollYOffset();
+    const float scrollYOffset = Engine::Input::ConsumeScrollYOffset();
     if (scrollYOffset != 0.0f) {
         targetZoom = std::max(minZoom, targetZoom + scrollYOffset * zoomStep);
     }
 
-    auto screenWidth = static_cast<float>(window->GetWidth());
-    auto screenHeight = static_cast<float>(window->GetHeight());
+    auto viewportSize = Engine::Application::Get().GetWindow()->GetSize();
+    auto mousePos = Engine::Input::GetMousePosition();
 
-    double screenX = 0.0;
-    double screenY = 0.0;
-    glfwGetCursorPos(handle, &screenX, &screenY);
-
-    const glm::vec3 worldCursor = camera->ScreenToWorld({screenX, screenY}, {screenWidth, screenHeight});
+    const glm::vec3 worldCursor = camera->ScreenToWorld(mousePos, viewportSize);
 
     const float nextZoom = glm::mix(currentZoom, targetZoom, zoomLerpFactor);
     if (std::abs(nextZoom - currentZoom) > 0.0001f) {

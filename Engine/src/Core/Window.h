@@ -25,6 +25,7 @@ namespace Engine {
         int GetHeight() const { return m_height; }
         int GetFrameBufferWidth() const { return m_frameBufferWidth; }
         int GetFrameBufferHeight() const { return m_frameBufferHeight; }
+        glm::vec2 GetSize() const { return {m_width, m_height}; }
 
         bool ShouldClose() const { return glfwWindowShouldClose(m_window); }
         void Update() const;

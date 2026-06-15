@@ -19,7 +19,7 @@ namespace Engine {
         return state == GLFW_PRESS;
     }
 
-    std::pair<float, float> Input::GetMousePosition() {
+    glm::vec2 Input::GetMousePosition() {
         const auto* window = Application::Get().GetWindow();
         auto* handle = window->GetHandle();
 
