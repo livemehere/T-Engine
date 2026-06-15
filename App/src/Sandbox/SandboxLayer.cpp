@@ -92,24 +92,16 @@ void SandboxLayer::OnDetach() {
 }
 
 void SandboxLayer::OnGuiRender() {
-    auto window = Engine::Application::Get().GetWindow();
-    auto* handle = window->GetHandle();
-
-    auto screenWidth = static_cast<float>(window->GetWidth());
-    auto screenHeight = static_cast<float>(window->GetHeight());
-
-    double screenX = 0.0;
-    double screenY = 0.0;
-    glfwGetCursorPos(handle, &screenX, &screenY);
-
-    const glm::vec3 worldCursor = camera->ScreenToWorld({screenX, screenY}, {screenWidth, screenHeight});
+    auto viewportSize = Engine::Application::Get().GetWindow()->GetSize();
+    auto mousePos = Engine::Input::GetMousePosition();
+    const glm::vec3 worldCursor = camera->ScreenToWorld(mousePos, viewportSize);
 
     ImGui::Begin("Mouse");
     ImGui::Text("World : %.1f x %.1f", worldCursor.x, worldCursor.y);
     ImGui::End();
 
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
-    drawList->AddCircle(ImVec2(screenX, screenY), 10.0f * camera->GetZoom(), IM_COL32(0, 255, 0, 255), 232, 2.0f);
+    drawList->AddCircle(ImVec2(mousePos.x, mousePos.y), 10.0f * camera->GetZoom(), IM_COL32(0, 255, 0, 255), 232, 2.0f);
 
     ImGui::Begin("Stats");
     ImGui::SetWindowFontScale(1.5f);
