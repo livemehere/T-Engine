@@ -8,8 +8,7 @@
 #include "Core/Input.h"
 
 SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::OrthographicCamera> camera)
-    : Layer(name), camera(std::move(camera)) {
-    targetZoom = this->camera->GetZoom();
+    : Layer(name), m_camera(std::move(camera)), m_cameraController(m_camera) {
 
     texture = Engine::AssetManager::AddTexture("noir", "textures/noir.png");
     texture2 = Engine::AssetManager::AddTexture("spider", "textures/spider.png");
@@ -19,40 +18,7 @@ SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::Orth
 }
 
 void SandboxLayer::OnUpdate(float dt) {
-    const float currentZoom = camera->GetZoom();
-
-    glm::vec3 position = camera->GetPosition();
-    const float moveAmount = cameraMoveSpeed * dt / currentZoom;
-
-    if (Engine::Input::IsKeyPressed(Engine::KeyCode::A)) {
-        position.x -= moveAmount;
-    }
-    if (Engine::Input::IsKeyPressed(Engine::KeyCode::D)) {
-        position.x += moveAmount;
-    }
-    if (Engine::Input::IsKeyPressed(Engine::KeyCode::S)) {
-        position.y -= moveAmount;
-    }
-    if (Engine::Input::IsKeyPressed(Engine::KeyCode::W)) {
-        position.y += moveAmount;
-    }
-
-    camera->SetPosition(position);
-
-    const float scrollYOffset = Engine::Input::ConsumeScrollYOffset();
-    if (scrollYOffset != 0.0f) {
-        targetZoom = std::max(minZoom, targetZoom + scrollYOffset * zoomStep);
-    }
-
-    auto viewportSize = Engine::Application::Get().GetWindow()->GetSize();
-    auto mousePos = Engine::Input::GetMousePosition();
-
-    const glm::vec3 worldCursor = camera->ScreenToWorld(mousePos, viewportSize);
-
-    const float nextZoom = glm::mix(currentZoom, targetZoom, zoomLerpFactor);
-    if (std::abs(nextZoom - currentZoom) > 0.0001f) {
-        camera->ZoomTowards(worldCursor, nextZoom);
-    }
+    m_cameraController.OnUpdate(dt);
 }
 
 void SandboxLayer::OnRender() {
@@ -69,7 +35,7 @@ void SandboxLayer::OnRender() {
     const int step = static_cast<int>(size.x) + gap;
     rotationDeg += 1.0f;
 
-    Engine::Renderer2D::BeginScene(camera->GetViewProjection());
+    Engine::Renderer2D::BeginScene(m_camera->GetViewProjection());
 
     for (int x = 0; x < width; x += step) {
         for (int y = 0; y < height; y += step) {
@@ -94,14 +60,14 @@ void SandboxLayer::OnDetach() {
 void SandboxLayer::OnGuiRender() {
     auto viewportSize = Engine::Application::Get().GetWindow()->GetSize();
     auto mousePos = Engine::Input::GetMousePosition();
-    const glm::vec3 worldCursor = camera->ScreenToWorld(mousePos, viewportSize);
+    const glm::vec3 worldCursor = m_camera->ScreenToWorld(mousePos, viewportSize);
 
     ImGui::Begin("Mouse");
     ImGui::Text("World : %.1f x %.1f", worldCursor.x, worldCursor.y);
     ImGui::End();
 
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
-    drawList->AddCircle(ImVec2(mousePos.x, mousePos.y), 10.0f * camera->GetZoom(), IM_COL32(0, 255, 0, 255), 232, 2.0f);
+    drawList->AddCircle(ImVec2(mousePos.x, mousePos.y), 10.0f * m_camera->GetZoom(), IM_COL32(0, 255, 0, 255), 232, 2.0f);
 
     ImGui::Begin("Stats");
     ImGui::SetWindowFontScale(1.5f);

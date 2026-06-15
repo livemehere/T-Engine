@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera/OrthographicCamera.h"
+#include "Camera/OrthographicCameraController.h"
 #include "Resource/Texture.h"
 #include "Layer/Layer.h"
 #include "Core/Application.h"
@@ -19,12 +20,9 @@ public:
 private:
     bool wireFrame = false;
 
-    std::shared_ptr<Engine::OrthographicCamera> camera;
+    std::shared_ptr<Engine::OrthographicCamera> m_camera;
+    Engine::OrthographicCameraController m_cameraController;
     const Engine::Texture* texture;
     const Engine::Texture* texture2;
-    float cameraMoveSpeed = 400.0f;
-    float zoomStep = 0.1f;
-    float minZoom = 0.1f;
-    float targetZoom = 1.0f;
-    float zoomLerpFactor = 0.15f;
+
 };
