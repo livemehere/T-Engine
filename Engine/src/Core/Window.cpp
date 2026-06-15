@@ -1,5 +1,7 @@
 #include "Window.h"
 
+#include "Input.h"
+
 namespace Engine {
     Window::Window(const WindowSpec& spec) {
         if (spec.width <= 0 || spec.height <= 0) {
@@ -59,12 +61,6 @@ namespace Engine {
         glfwSwapBuffers(m_window);
     }
 
-    float Window::ConsumeScrollYOffset() {
-        const float scrollYOffset = m_scrollYOffset;
-        m_scrollYOffset = 0.0f;
-        return scrollYOffset;
-    }
-
     void Window::WindowSizeCallback(GLFWwindow* window, int width, int height) {
         const auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
         self->m_width = width;
@@ -81,8 +77,7 @@ namespace Engine {
     }
 
     void Window::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
-        const auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
-        self->m_scrollYOffset += static_cast<float>(yOffset);
+        Input::AddMouseScrollOffset(xOffset, yOffset);
     }
 
     void Window::CheckTextureLimits() {

@@ -26,7 +26,6 @@ namespace Engine {
         int GetFrameBufferWidth() const { return m_frameBufferWidth; }
         int GetFrameBufferHeight() const { return m_frameBufferHeight; }
 
-        float ConsumeScrollYOffset();
         bool ShouldClose() const { return glfwWindowShouldClose(m_window); }
         void Update() const;
 
@@ -39,8 +38,6 @@ namespace Engine {
         int m_frameBufferWidth;
         int m_frameBufferHeight;
         bool m_vsync = true;
-
-        float m_scrollYOffset = 0.0f;
 
         static void WindowSizeCallback(GLFWwindow* window, int width, int height);
         static void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
