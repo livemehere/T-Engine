@@ -2,6 +2,7 @@
 
 #include "OpenGL/Shader.h"
 #include "OpenGL/VertexArray.h"
+#include "Resource/AssetManager.h"
 
 namespace Engine {
 
@@ -21,7 +22,7 @@ namespace Engine {
         Renderer2D::Statistics stats;
         std::shared_ptr<VertexArray> rectVAO;
         std::shared_ptr<VertexBuffer> rectVBO;
-        std::shared_ptr<Shader> textureShader;
+        const Shader* textureShader = nullptr;
         std::unique_ptr<Texture> whiteTexture;
 
         unsigned int rectIndexCount = 0; // total indices count of current frame
@@ -96,7 +97,7 @@ namespace Engine {
         s_storage->textureSlots[0] = s_storage->whiteTexture.get();
 
         // shader
-        s_storage->textureShader = std::make_shared<Shader>("../../../assets/shaders/Texture.vert","../../../assets/shaders/Texture.frag");
+        s_storage->textureShader = AssetManager::AddShader("default","shaders/Texture.vert","shaders/Texture.frag");
         s_storage->textureShader->Bind();
         // #### Rect End ####
 
