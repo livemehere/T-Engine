@@ -60,6 +60,8 @@ namespace Engine {
         // glEnable(GL_DEPTH_TEST);
 
         while (!m_window->ShouldClose()) {
+            Renderer2D::ResetStats();
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glfwPollEvents();
 
@@ -70,6 +72,7 @@ namespace Engine {
             for (const auto& layer : m_layerStack) {
                 layer->OnUpdate(dt);
             }
+
 
             // NOTE: can be elsewhere like thread
             for (const auto& layer : m_layerStack) {

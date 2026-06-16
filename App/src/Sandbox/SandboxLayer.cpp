@@ -22,7 +22,7 @@ void SandboxLayer::OnUpdate(float dt) {
 }
 
 void SandboxLayer::OnRender() {
-    Engine::Renderer2D::ResetStats();
+
 
     auto window = Engine::Application::Get().GetWindow();
     float width = static_cast<float>(window->GetWidth()) * 5;
