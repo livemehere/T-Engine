@@ -27,10 +27,10 @@ namespace Engine {
         void UnBind() const;
 
     private:
-        GLuint m_id;
-        int m_width;
-        int m_height;
-        int m_channels;
+        GLuint m_id = 0;
+        int m_width = 0;
+        int m_height = 0;
+        int m_channels = 0;
         unsigned char* m_data = nullptr;
         void UploadTexture();
     };

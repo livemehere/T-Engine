@@ -6,39 +6,43 @@
 
 namespace Engine {
 
-    static constexpr unsigned int TEXTURE_SAMPLES_COUNT = 16;
-    static constexpr unsigned int MAX_RECT_COUNT = 10000;
-    static constexpr unsigned int MAX_VERTICES = MAX_RECT_COUNT * 4;
-    static constexpr unsigned int MAX_INDICES = MAX_RECT_COUNT * 6;
+    static constexpr uint32_t TEXTURE_SLOT_COUNT = 16;
+    static constexpr uint32_t MAX_QUAD_COUNT = 10000;
+    static constexpr uint32_t MAX_QUAD_VERTICES = MAX_QUAD_COUNT * 4;
+    static constexpr uint32_t MAX_QUAD_INDICES = MAX_QUAD_COUNT * 6;
 
-    struct RectVertex {
+    struct QuadVertex {
         glm::vec3 position;
         glm::vec4 color;
         glm::vec2 TexCoord;
-        float textureIndex;
+        int textureIndex;
     };
 
-    struct Renderer2DStorage {
+    struct Renderer2DData {
         Renderer2D::Statistics stats;
-        std::shared_ptr<VertexArray> rectVAO;
-        std::shared_ptr<VertexBuffer> rectVBO;
-        const Shader* textureShader = nullptr;
+
+        std::unique_ptr<VertexArray> quadVAO;
+        std::shared_ptr<VertexBuffer> quadVBO;
+        Shader* quadShader = nullptr;
         std::unique_ptr<Texture> whiteTexture;
 
-        unsigned int rectIndexCount = 0; // total indices count of current frame
-        RectVertex* rectVertexBufferBase = nullptr; // starting point
-        RectVertex* rectVertexBufferPtr = nullptr; // current cursor
+        uint32_t quadIndexCount = 0; // total indices count of current frame
+        std::unique_ptr<QuadVertex[]> quadVertexBuffers; // starting point
+        QuadVertex* quadVertexBufferPtr = nullptr; // current cursor
+
+        int quadViewProjectionLoc = -1;
+        int quadTexturesLoc = -1;
 
         // texture
-        std::vector<const Texture*> textureSlots;
-        float textureSlotIndex = 1.0f; // 0 = whiteTexture fixed;
+        std::vector<Texture*> textureSlots;
+        int textureSlotIndex = 1; // 0 = whiteTexture fixed;
 
     };
 
-    static Renderer2DStorage* s_storage;
+    static std::unique_ptr<Renderer2DData> s_storage;
 
     void Renderer2D::ResetStats() {
-        memset(&s_storage->stats, 0, sizeof(Statistics));
+        s_storage->stats = {};
     }
 
     Renderer2D::Statistics Renderer2D::GetStats() {
@@ -46,88 +50,71 @@ namespace Engine {
     }
 
     void Renderer2D::Init() {
-        if (s_storage != nullptr) {
-            return;
-        }
+        s_storage = std::make_unique<Renderer2DData>();
 
-        s_storage = new Renderer2DStorage();
-
-        // #### Rect Start ####
-        s_storage->rectVAO = std::make_shared<VertexArray>();
-
-        // #### VBO START ####
-        s_storage->rectVertexBufferBase = new RectVertex[MAX_VERTICES];
-        auto vertexBuffer = std::make_shared<VertexBuffer>(nullptr, sizeof(RectVertex) * MAX_VERTICES);
-        vertexBuffer->SetLayout({
+        // -- Quad start --
+        s_storage->quadVAO = std::make_unique<VertexArray>();
+        // VBO
+        s_storage->quadVertexBuffers =  std::make_unique<QuadVertex[]>(MAX_QUAD_VERTICES);
+        auto quadVBO = std::make_shared<VertexBuffer>(nullptr, sizeof(QuadVertex) * MAX_QUAD_VERTICES);
+        quadVBO->SetLayout({
             {ShaderDataType::Float3, "aPos"},
             {ShaderDataType::Float4, "aColor"},
             {ShaderDataType::Float2, "aTexCoord"},
-            {ShaderDataType::Float, "aTextureIndex"},
+            {ShaderDataType::Int, "aTextureIndex"},
         });
-        s_storage->rectVBO = vertexBuffer;
-        s_storage->rectVAO->AddVertexBuffer(vertexBuffer);
-        // #### VBO END ####
+        s_storage->quadVBO = std::move(quadVBO);
+        s_storage->quadVAO->AddVertexBuffer(s_storage->quadVBO);
 
-        // #### EBO START ####
-        unsigned int* rectIndices = new unsigned int[MAX_INDICES];
-        unsigned int offset = 0;
+        // EBO
+        auto* quadIndices = new uint32_t[MAX_QUAD_INDICES];
+        uint32_t offset = 0;
 
-        for (unsigned int i=0; i< MAX_INDICES; i+=6) {
-            rectIndices[i + 0] = offset + 0;
-            rectIndices[i + 1] = offset + 1;
-            rectIndices[i + 2] = offset + 2;
+        for (uint32_t i=0; i< MAX_QUAD_INDICES; i+=6) {
+            quadIndices[i + 0] = offset + 0;
+            quadIndices[i + 1] = offset + 1;
+            quadIndices[i + 2] = offset + 2;
 
-            rectIndices[i + 3] = offset + 2;
-            rectIndices[i + 4] = offset + 3;
-            rectIndices[i + 5] = offset + 0;
+            quadIndices[i + 3] = offset + 2;
+            quadIndices[i + 4] = offset + 3;
+            quadIndices[i + 5] = offset + 0;
             offset +=4;
         }
-        auto indexBuffer = std::make_shared<IndexBuffer>(rectIndices,MAX_INDICES);
-        s_storage->rectVAO->SetIndexBuffer(indexBuffer);
-        delete[] rectIndices;
-        // #### EBO END ####
+        auto indexBuffer = std::make_shared<IndexBuffer>(quadIndices,MAX_QUAD_INDICES);
+        s_storage->quadVAO->SetIndexBuffer(indexBuffer);
+        delete[] quadIndices;
+        // -- Quad end --
 
+        // shader setup
+        s_storage->quadShader = AssetManager::AddShader("default","shaders/Quad.vert","shaders/Quad.frag");
+        s_storage->quadShader->Bind();
+        s_storage->quadViewProjectionLoc =  glGetUniformLocation(s_storage->quadShader->GetId(), "uViewProjection");
+        s_storage->quadTexturesLoc = glGetUniformLocation(s_storage->quadShader->GetId(), "uTextures");
 
-        // 1x1 white Texture
+        // textures setup
         unsigned char whitePixel[] = { 255, 255, 255, 255 };
         s_storage->whiteTexture = std::make_unique<Texture>(whitePixel, 1,1,4);
-
-        // texture slots
-        s_storage->textureSlots.resize(TEXTURE_SAMPLES_COUNT);
+        s_storage->textureSlots.resize(TEXTURE_SLOT_COUNT);
         s_storage->textureSlots[0] = s_storage->whiteTexture.get();
 
-        // shader
-        s_storage->textureShader = AssetManager::AddShader("default","shaders/Texture.vert","shaders/Texture.frag");
-        s_storage->textureShader->Bind();
-        // #### Rect End ####
-
-        // texture
-        int samplers[TEXTURE_SAMPLES_COUNT];
-        for (int i=0; i<TEXTURE_SAMPLES_COUNT;i++) {
+        int samplers[TEXTURE_SLOT_COUNT];
+        for (int i=0; i<TEXTURE_SLOT_COUNT;i++) {
             samplers[i] = i;
         }
-        int texturesLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uTextures");
-        glUniform1iv(texturesLoc, TEXTURE_SAMPLES_COUNT, samplers);
+        glUniform1iv( s_storage->quadTexturesLoc, TEXTURE_SLOT_COUNT, samplers);
 
     }
 
     void Renderer2D::Shutdown() {
-        if (s_storage == nullptr) {
-            return;
-        }
-
-        delete[] s_storage->rectVertexBufferBase;
-        delete s_storage;
-        s_storage = nullptr;
+        s_storage.reset();
     }
 
     void Renderer2D::BeginScene(const glm::mat4& viewProjection) {
         // shader
-        s_storage->textureShader->Bind();
+        s_storage->quadShader->Bind();
 
         // camera
-        int vpLoc = glGetUniformLocation(s_storage->textureShader->GetId(), "uViewProjection");
-        glUniformMatrix4fv(vpLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
+        glUniformMatrix4fv(s_storage->quadViewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
 
         StartBatch();
     }
@@ -137,74 +124,68 @@ namespace Engine {
         Flush();
     }
 
-    // Rect with solid color
-    void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+    void Renderer2D::DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
         float rotationDeg) {
-        m_DrawRect(position, size, color, s_storage->whiteTexture.get(), rotationDeg);
+        m_DrawQuad(position, size, color, s_storage->whiteTexture.get(), rotationDeg);
     }
 
-    // Rect with texture & color
-    void Renderer2D::DrawRect(const glm::vec2 &position, const glm::vec2 &size,
-         const glm::vec4 &color, const Texture* texture, float rotationDeg) {
-        m_DrawRect(position, size, color, texture, rotationDeg);
+    void Renderer2D::DrawQuad(const glm::vec2 &position, const glm::vec2 &size,
+          Texture* texture, const glm::vec4 &tintColor, float rotationDeg) {
+        m_DrawQuad(position, size, tintColor, texture, rotationDeg);
     }
 
     void Renderer2D::StartBatch() {
-        s_storage->rectIndexCount = 0;
-        s_storage->rectVertexBufferPtr = s_storage->rectVertexBufferBase;
-        // texture
-        s_storage->textureSlotIndex = 1.0f;
+        s_storage->quadIndexCount = 0;
+        s_storage->quadVertexBufferPtr = s_storage->quadVertexBuffers.get();
+        s_storage->textureSlotIndex = 1;
     }
 
     void Renderer2D::Flush() {
-        if (s_storage->rectIndexCount == 0) return;
+        if (s_storage->quadIndexCount == 0) return;
 
-        uint32_t dataSize = (uint32_t)((uint8_t*)s_storage->rectVertexBufferPtr - (uint8_t*)s_storage->rectVertexBufferBase);
-        s_storage->rectVBO->SetData(s_storage->rectVertexBufferBase, dataSize);
+        const auto dataSize = reinterpret_cast<uint8_t *>(s_storage->quadVertexBufferPtr) - reinterpret_cast<uint8_t *>(
+                                                  s_storage->quadVertexBuffers.get());
+        s_storage->quadVBO->SetData(s_storage->quadVertexBuffers.get(), dataSize);
 
-        for (int i=0; i<(int)s_storage->textureSlotIndex; i++) {
+        // only used texture slots activate
+        for (int i=0; i<s_storage->textureSlotIndex; i++) {
             if (s_storage->textureSlots[i] != nullptr) {
                 s_storage->textureSlots[i]->Bind(i);
             }
         }
 
-        s_storage->rectVAO->Bind();
-        s_storage->textureShader->Bind();
-        glDrawElements(GL_TRIANGLES,s_storage->rectIndexCount, GL_UNSIGNED_INT, 0);
+        s_storage->quadVAO->Bind();
+        s_storage->quadShader->Bind();
+        glDrawElements(GL_TRIANGLES,s_storage->quadIndexCount, GL_UNSIGNED_INT, 0);
         s_storage->stats.drawCalls++;
     }
 
 
-    // Rect Base
-    void Renderer2D::m_DrawRect(const glm::vec2 &position, const glm::vec2 &size,
-        const glm::vec4 &color, const Texture* texture, float rotationDeg) {
-        if (s_storage->rectIndexCount >= MAX_INDICES) {
+    void Renderer2D::m_DrawQuad(const glm::vec2 &position, const glm::vec2 &size,
+        const glm::vec4 &color, Texture* texture, float rotationDeg) {
+        if (s_storage->quadIndexCount + 6 > MAX_QUAD_INDICES) {
             Flush();
             StartBatch();
         }
 
-        float textureIndex = 0.0f;
-        if (texture == nullptr) {
-            texture = s_storage->whiteTexture.get();
-        }
-
-        for (int i = 1; i < TEXTURE_SAMPLES_COUNT; i++) {
-            // re-use
+        int textureIndex = -1;
+        for (int i = 1; i < TEXTURE_SLOT_COUNT; i++) {
+            // cache hit
             if (s_storage->textureSlots[i] == texture) {
-                textureIndex = (float)i;
+                textureIndex = i;
                 break;
             }
         }
 
         // new texture
-        if (textureIndex == 0.0f) {
-            if (s_storage->textureSlotIndex >= TEXTURE_SAMPLES_COUNT) {
+        if (textureIndex == -1) {
+            if (s_storage->textureSlotIndex >= TEXTURE_SLOT_COUNT) {
                 Flush();
                 StartBatch();
             }
 
             textureIndex = s_storage->textureSlotIndex;
-            s_storage->textureSlots[(int)textureIndex] = texture;
+            s_storage->textureSlots[textureIndex] = texture;
             s_storage->textureSlotIndex++;
         }
 
@@ -234,15 +215,15 @@ namespace Engine {
         };
 
         for (size_t i = 0; i < 4; i++) {
-            s_storage->rectVertexBufferPtr->position = transform * vertexBasePositions[i];
-            s_storage->rectVertexBufferPtr->color = color;
-            s_storage->rectVertexBufferPtr->TexCoord = textureCoords[i];
-            s_storage->rectVertexBufferPtr->textureIndex = textureIndex;
-            s_storage->rectVertexBufferPtr++;
+            s_storage->quadVertexBufferPtr->position = transform * vertexBasePositions[i];
+            s_storage->quadVertexBufferPtr->color = color;
+            s_storage->quadVertexBufferPtr->TexCoord = textureCoords[i];
+            s_storage->quadVertexBufferPtr->textureIndex = textureIndex;
+            s_storage->quadVertexBufferPtr++;
         }
 
-        s_storage->rectIndexCount += 6;
-        s_storage->stats.rectCount++;
+        s_storage->quadIndexCount += 6;
+        s_storage->stats.quadCount++;
 
     }
 }

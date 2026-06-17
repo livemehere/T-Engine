@@ -108,7 +108,7 @@ namespace Engine {
         const BufferLayout& GetLayout() const { return m_layout; }
         void SetLayout(const BufferLayout& layout) { m_layout = layout; }
 
-        void SetData(const void* data, GLuint size);
+        void SetData(const void* data, GLsizeiptr size);
     private:
         GLuint m_id = 0;
         BufferLayout m_layout;

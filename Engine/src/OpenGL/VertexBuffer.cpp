@@ -38,7 +38,7 @@ namespace Engine {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void VertexBuffer::SetData(const void* data, GLuint size) {
+    void VertexBuffer::SetData(const void* data, GLsizeiptr size) {
         glBindBuffer(GL_ARRAY_BUFFER, m_id);
         glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
     }

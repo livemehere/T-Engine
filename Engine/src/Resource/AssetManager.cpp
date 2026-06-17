@@ -1,7 +1,7 @@
 #include "AssetManager.h"
 
 namespace Engine {
-    const Texture* AssetManager::AddTexture(const std::string &name, const std::string &relativePath) {
+     Texture* AssetManager::AddTexture(const std::string &name, const std::string &relativePath) {
         if (const auto found = GetTexture(name)) {
            return found;
         }
@@ -14,7 +14,7 @@ namespace Engine {
         return s_textures[name].get();
     }
 
-    const Texture* AssetManager::GetTexture(const std::string &name) {
+    Texture* AssetManager::GetTexture(const std::string &name) {
         if (const auto it = s_textures.find(name); it != s_textures.end()) {
             return it->second.get();
         }
@@ -29,7 +29,7 @@ namespace Engine {
         s_textures.clear();
     }
 
-    const Shader * AssetManager::AddShader(const std::string &name, const std::string &vertexShaderPath,
+    Shader * AssetManager::AddShader(const std::string &name, const std::string &vertexShaderPath,
         const std::string &fragShaderPath) {
         if (const auto found = GetShader(name)) {
             return found;
@@ -40,7 +40,7 @@ namespace Engine {
         return s_shaders[name].get();
     }
 
-    const Shader * AssetManager::GetShader(const std::string &name) {
+    Shader * AssetManager::GetShader(const std::string &name) {
         if (const auto it = s_shaders.find(name); it != s_shaders.end()) {
             return (*it).second.get();
         }

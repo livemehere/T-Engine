@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/400fea33-e555-4ee4-ad3e-6cbaa22a639e
 
 ### Batch Rendering
 
-> 230400 rect on 1 draw calls
+> 230400 quad on 1 draw calls
 
 https://github.com/user-attachments/assets/dc0eb929-e556-4b05-b010-6846f9271d24
 

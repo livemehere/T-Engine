@@ -41,7 +41,7 @@ void SandboxLayer::OnRender() {
         for (int y = 0; y < height; y += step) {
             glm::vec3 position(x + size.x / 2, y + size.y / 2, 2.0f);
             const bool useFirstTexture = ((x / step) + (y / step)) % 2 == 0;
-            Engine::Renderer2D::DrawRect(position, size, color, useFirstTexture ? texture : texture2, rotationDeg);
+            Engine::Renderer2D::DrawQuad(position, size, useFirstTexture ? texture : texture2, color, rotationDeg);
         }
     }
 
@@ -75,7 +75,7 @@ void SandboxLayer::OnGuiRender() {
 
     auto stats = Engine::Renderer2D::GetStats();
     ImGui::Text("Draw Calls: %d", stats.drawCalls);
-    ImGui::Text("Rect Count: %d", stats.rectCount);
+    ImGui::Text("Quad Count: %d", stats.quadCount);
     ImGui::SetWindowFontScale(1.0f);
     ImGui::End();
 }

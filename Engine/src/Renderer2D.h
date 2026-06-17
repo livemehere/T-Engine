@@ -8,7 +8,7 @@ namespace Engine {
     public:
         struct Statistics {
             unsigned int drawCalls = 0;
-            unsigned int rectCount = 0;
+            unsigned int quadCount = 0;
         };
         static void ResetStats();
         static Statistics GetStats();
@@ -19,16 +19,14 @@ namespace Engine {
         static void BeginScene(const glm::mat4& viewProjection);
         static void EndScene();
 
-        // solid
-        static void DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotationDeg = 0.0f);
+        static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotationDeg = 0.0f);
+        static void DrawQuad(const glm::vec2& position, const glm::vec2& size, Texture* texture, const glm::vec4& tintColor = glm::vec4(1.0f),  float rotationDeg = 0.0f);
 
-        // texture
-        static void DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Texture* texture, float rotationDeg = 0.0f);
     private:
         static void StartBatch();
         static void Flush();
 
-        static void m_DrawRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, const Texture* texture, float rotationDeg = 0.0f);
+        static void m_DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, Texture* texture, float rotationDeg = 0.0f);
     };
 
 }

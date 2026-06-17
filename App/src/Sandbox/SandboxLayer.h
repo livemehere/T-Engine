@@ -22,7 +22,7 @@ private:
 
     std::shared_ptr<Engine::OrthographicCamera> m_camera;
     Engine::OrthographicCameraController m_cameraController;
-    const Engine::Texture* texture;
-    const Engine::Texture* texture2;
+    Engine::Texture* texture;
+    Engine::Texture* texture2;
 
 };
