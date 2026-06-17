@@ -49,13 +49,23 @@ namespace Engine {
 
         for (const auto& element : layout.GetElements()) {
             glEnableVertexAttribArray(attributeIndex);
-            glVertexAttribPointer(
+            if (element.type == ShaderDataType::Int ||element.type == ShaderDataType::Int2 || element.type == ShaderDataType::Int3 || element.type == ShaderDataType::Int4) {
+                glVertexAttribIPointer(
                 attributeIndex,
                 GetShaderDataTypeCount(element.type),
                 ShaderDataTypeToOpenGLBaseType(element.type),
-                element.normalized ? GL_TRUE : GL_FALSE,
                 layout.GetStride(),
                 reinterpret_cast<void *>(element.offset));
+            }else {
+                glVertexAttribPointer(
+               attributeIndex,
+               GetShaderDataTypeCount(element.type),
+               ShaderDataTypeToOpenGLBaseType(element.type),
+               element.normalized ? GL_TRUE : GL_FALSE,
+               layout.GetStride(),
+               reinterpret_cast<void *>(element.offset));
+            }
+
             attributeIndex++;
         }
 
