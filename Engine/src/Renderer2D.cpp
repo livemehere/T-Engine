@@ -86,7 +86,7 @@ namespace Engine {
         // -- Quad end --
 
         // shader setup
-        s_storage->quadShader = AssetManager::AddShader("default","shaders/Quad.vert","shaders/Quad.frag");
+        s_storage->quadShader = AssetManager::AddShader("Renderer2D.Quad","shaders/Quad.vert","shaders/Quad.frag");
         s_storage->quadShader->Bind();
         s_storage->quadViewProjectionLoc =  glGetUniformLocation(s_storage->quadShader->GetId(), "uViewProjection");
         s_storage->quadTexturesLoc = glGetUniformLocation(s_storage->quadShader->GetId(), "uTextures");
