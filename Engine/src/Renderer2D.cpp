@@ -168,7 +168,7 @@ namespace Engine {
             StartBatch();
         }
 
-        int textureIndex = -1;
+        int textureIndex = 0;
         for (int i = 1; i < TEXTURE_SLOT_COUNT; i++) {
             // cache hit
             if (s_storage->textureSlots[i] == texture) {
@@ -178,7 +178,7 @@ namespace Engine {
         }
 
         // new texture
-        if (textureIndex == -1) {
+        if (textureIndex == 0) {
             if (s_storage->textureSlotIndex >= TEXTURE_SLOT_COUNT) {
                 Flush();
                 StartBatch();
