@@ -1,8 +1,8 @@
 #pragma once
 
-namespace Engine {
+#include "EngineCommon.h"
 
-    struct RectVertex;
+namespace Engine {
 
     enum class ShaderDataType {
         Bool,
@@ -95,7 +95,7 @@ namespace Engine {
 
     class VertexBuffer {
     public:
-        VertexBuffer(const RectVertex* vertices, GLuint size);
+        VertexBuffer(const void* vertices, GLuint size);
         ~VertexBuffer();
 
         VertexBuffer(const VertexBuffer&) = delete;

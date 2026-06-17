@@ -1,7 +1,7 @@
 #include "VertexBuffer.h"
 
 namespace Engine {
-    VertexBuffer::VertexBuffer(const RectVertex *vertices, unsigned int size) {
+    VertexBuffer::VertexBuffer(const void* vertices, GLuint size) {
 
         // NOTE: enable nullptr for batch rendering
         // if (vertices == nullptr) {
@@ -38,7 +38,7 @@ namespace Engine {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void VertexBuffer::SetData(const void *data, unsigned int size) {
+    void VertexBuffer::SetData(const void* data, GLuint size) {
         glBindBuffer(GL_ARRAY_BUFFER, m_id);
         glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
     }
