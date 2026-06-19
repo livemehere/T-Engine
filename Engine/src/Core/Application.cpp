@@ -54,6 +54,9 @@ namespace Engine {
 
         Renderer2D::Init();
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         double lastTime = glfwGetTime();
 
         // NOTE: 2D zIndex handle by transform z sort, not use GL_DEPTH_TEST, this cause PNG Alpha clipping bug.
