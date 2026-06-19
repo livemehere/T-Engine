@@ -146,7 +146,11 @@ namespace Engine {
         for (int i=0; i<TEXTURE_SLOT_COUNT;i++) {
             samplers[i] = i;
         }
+
+        s_storage->quadShader->Bind();
         glUniform1iv( s_storage->quadTexturesLoc, TEXTURE_SLOT_COUNT, samplers);
+
+        s_storage->circleShader->Bind();
         glUniform1iv( s_storage->circleTexturesLoc, TEXTURE_SLOT_COUNT, samplers);
 
     }
@@ -164,7 +168,6 @@ namespace Engine {
 
         StartBatch();
     }
-
 
     void Renderer2D::EndScene() {
         Flush();
