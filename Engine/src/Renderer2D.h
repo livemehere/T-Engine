@@ -22,11 +22,15 @@ namespace Engine {
         static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float rotationDeg = 0.0f);
         static void DrawQuad(const glm::vec2& position, const glm::vec2& size, Texture* texture, const glm::vec4& tintColor = glm::vec4(1.0f),  float rotationDeg = 0.0f);
 
+        static void DrawCircle(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float thickness = 1.0f, float fade = 0.005f, float rotationDeg = 0.0f);
+        static void DrawCircle(const glm::vec2& position, const glm::vec2& size, Texture* texture, const glm::vec4& tintColor = glm::vec4(1.0f), float thickness = 1.0f, float fade = 0.005f, float rotationDeg = 0.0f);
+
     private:
         static void StartBatch();
         static void Flush();
 
-        static void m_DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, Texture* texture, float rotationDeg = 0.0f);
+        static int GetTextureIndex(Texture* texture);
+        static glm::mat4 GetTransform(const glm::vec2& position, const glm::vec2& size, float rotationDeg);
     };
 
 }

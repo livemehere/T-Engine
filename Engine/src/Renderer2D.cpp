@@ -11,6 +11,28 @@ namespace Engine {
     static constexpr uint32_t MAX_QUAD_VERTICES = MAX_QUAD_COUNT * 4;
     static constexpr uint32_t MAX_QUAD_INDICES = MAX_QUAD_COUNT * 6;
 
+    // Vertex order must match the shared index pattern: BL, BR, TR, TL.
+    static const glm::vec4 VERTEX_BASE_POSITIONS[4] = {
+        { -0.5f, -0.5f, 0.0f, 1.0f }, // BL: model-space bottom-left
+        {  0.5f, -0.5f, 0.0f, 1.0f }, // BR: model-space bottom-right
+        {  0.5f,  0.5f, 0.0f, 1.0f }, // TR: model-space top-right
+        { -0.5f,  0.5f, 0.0f, 1.0f }  // TL: model-space top-left
+    };
+
+    static const glm::vec2 TEXTURE_COORDS[4] = {
+        { 0.0f, 0.0f }, // BL: texture lower-left
+        { 1.0f, 0.0f }, // BR: texture lower-right
+        { 1.0f, 1.0f }, // TR: texture upper-right
+        { 0.0f, 1.0f }  // TL: texture upper-left
+    };
+
+    static const glm::vec3 CIRCLE_LOCAL_POSITIONS[4] = {
+        { -1.0f, -1.0f, 0.0f }, // BL: circle shader local bottom-left
+        {  1.0f, -1.0f, 0.0f }, // BR: circle shader local bottom-right
+        {  1.0f,  1.0f, 0.0f }, // TR: circle shader local top-right
+        { -1.0f,  1.0f, 0.0f }  // TL: circle shader local top-left
+    };
+
     struct QuadVertex {
         glm::vec3 position;
         glm::vec4 color;
@@ -72,6 +94,34 @@ namespace Engine {
 
     Renderer2D::Statistics Renderer2D::GetStats() {
         return s_storage->stats;
+    }
+
+    int Renderer2D::GetTextureIndex(Texture* texture) {
+        for (int i = 1; i < TEXTURE_SLOT_COUNT; i++) {
+            if (s_storage->textureSlots[i] == texture) {
+                return i;
+            }
+        }
+
+        if (s_storage->textureSlotIndex >= TEXTURE_SLOT_COUNT) {
+            Flush();
+            StartBatch();
+        }
+
+        const int textureIndex = s_storage->textureSlotIndex;
+        s_storage->textureSlots[textureIndex] = texture;
+        s_storage->textureSlotIndex++;
+        return textureIndex;
+    }
+
+    glm::mat4 Renderer2D::GetTransform(const glm::vec2& position, const glm::vec2& size, float rotationDeg) {
+        glm::vec2 pivot(0.5f, 0.5f);
+        glm::vec3 pivotOffset = glm::vec3((0.5f - pivot.x) * size.x, (0.5f - pivot.y) * size.y, 0.0f);
+
+        return glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f))
+        * glm::rotate(glm::mat4(1.0f), glm::radians(rotationDeg), glm::vec3(0.0f, 0.0f, 1.0f))
+        * glm::translate(glm::mat4(1.0f), pivotOffset)
+        * glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 1.0f));
     }
 
     void Renderer2D::Init() {
@@ -175,12 +225,60 @@ namespace Engine {
 
     void Renderer2D::DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
         float rotationDeg) {
-        m_DrawQuad(position, size, color, s_storage->whiteTexture.get(), rotationDeg);
+        DrawQuad(position, size, s_storage->whiteTexture.get(), color, rotationDeg);
     }
 
     void Renderer2D::DrawQuad(const glm::vec2 &position, const glm::vec2 &size,
           Texture* texture, const glm::vec4 &tintColor, float rotationDeg) {
-        m_DrawQuad(position, size, tintColor, texture, rotationDeg);
+        if (s_storage->quadIndexCount + 6 > MAX_QUAD_INDICES) {
+            Flush();
+            StartBatch();
+        }
+
+        const int textureIndex = GetTextureIndex(texture);
+        const glm::mat4 transform = GetTransform(position, size, rotationDeg);
+
+        for (size_t i = 0; i < 4; i++) {
+            s_storage->quadVertexBufferPtr->position = transform * VERTEX_BASE_POSITIONS[i];
+            s_storage->quadVertexBufferPtr->color = tintColor;
+            s_storage->quadVertexBufferPtr->TexCoord = TEXTURE_COORDS[i];
+            s_storage->quadVertexBufferPtr->textureIndex = textureIndex;
+            s_storage->quadVertexBufferPtr++;
+        }
+
+        s_storage->quadIndexCount += 6;
+        s_storage->stats.quadCount++;
+    }
+
+    void Renderer2D::DrawCircle(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+        float thickness, float fade, float rotationDeg) {
+        DrawCircle(position, size, s_storage->whiteTexture.get(), color, thickness, fade, rotationDeg);
+    }
+
+    void Renderer2D::DrawCircle(const glm::vec2 &position, const glm::vec2 &size,
+          Texture* texture, const glm::vec4 &tintColor, float thickness, float fade, float rotationDeg) {
+        if (s_storage->circleIndexCount + 6 > MAX_QUAD_INDICES) {
+            Flush();
+            StartBatch();
+        }
+
+        const int textureIndex = GetTextureIndex(texture);
+
+        const glm::mat4 transform = GetTransform(position, size, rotationDeg);
+
+        for (size_t i = 0; i < 4; i++) {
+            s_storage->circleVertexBufferPtr->position = transform * VERTEX_BASE_POSITIONS[i];
+            s_storage->circleVertexBufferPtr->localPosition = CIRCLE_LOCAL_POSITIONS[i];
+            s_storage->circleVertexBufferPtr->color = tintColor;
+            s_storage->circleVertexBufferPtr->TexCoord = TEXTURE_COORDS[i];
+            s_storage->circleVertexBufferPtr->textureIndex = textureIndex;
+            s_storage->circleVertexBufferPtr->thickness = thickness;
+            s_storage->circleVertexBufferPtr->fade = fade;
+            s_storage->circleVertexBufferPtr++;
+        }
+
+        s_storage->circleIndexCount += 6;
+        s_storage->stats.quadCount++;
     }
 
     void Renderer2D::StartBatch() {
@@ -194,89 +292,33 @@ namespace Engine {
     }
 
     void Renderer2D::Flush() {
+        // only used texture slots activate
+        for (int i=0; i<s_storage->textureSlotIndex; i++) {
+            if (s_storage->textureSlots[i] != nullptr) {
+                s_storage->textureSlots[i]->Bind(i);
+            }
+        }
+
         if (s_storage->quadIndexCount) {
             const auto dataSize = reinterpret_cast<uint8_t *>(s_storage->quadVertexBufferPtr) - reinterpret_cast<uint8_t *>(
                                                       s_storage->quadVertexBuffers.get());
             s_storage->quadVBO->SetData(s_storage->quadVertexBuffers.get(), dataSize);
-
-            // only used texture slots activate
-            for (int i=0; i<s_storage->textureSlotIndex; i++) {
-                if (s_storage->textureSlots[i] != nullptr) {
-                    s_storage->textureSlots[i]->Bind(i);
-                }
-            }
-
             s_storage->quadVAO->Bind();
             s_storage->quadShader->Bind();
             glDrawElements(GL_TRIANGLES,s_storage->quadIndexCount, GL_UNSIGNED_INT, 0);
             s_storage->stats.drawCalls++;
         }
+
+        if (s_storage->circleIndexCount) {
+            const auto dataSize = reinterpret_cast<uint8_t *>(s_storage->circleVertexBufferPtr) - reinterpret_cast<uint8_t *>(
+                                                      s_storage->circleVertexBuffers.get());
+            s_storage->circleVBO->SetData(s_storage->circleVertexBuffers.get(), dataSize);
+            s_storage->circleVAO->Bind();
+            s_storage->circleShader->Bind();
+            glDrawElements(GL_TRIANGLES,s_storage->circleIndexCount, GL_UNSIGNED_INT, 0);
+            s_storage->stats.drawCalls++;
+        }
     }
 
 
-    void Renderer2D::m_DrawQuad(const glm::vec2 &position, const glm::vec2 &size,
-        const glm::vec4 &color, Texture* texture, float rotationDeg) {
-        if (s_storage->quadIndexCount + 6 > MAX_QUAD_INDICES) {
-            Flush();
-            StartBatch();
-        }
-
-        int textureIndex = 0;
-        for (int i = 1; i < TEXTURE_SLOT_COUNT; i++) {
-            // cache hit
-            if (s_storage->textureSlots[i] == texture) {
-                textureIndex = i;
-                break;
-            }
-        }
-
-        // new texture
-        if (textureIndex == 0) {
-            if (s_storage->textureSlotIndex >= TEXTURE_SLOT_COUNT) {
-                Flush();
-                StartBatch();
-            }
-
-            textureIndex = s_storage->textureSlotIndex;
-            s_storage->textureSlots[textureIndex] = texture;
-            s_storage->textureSlotIndex++;
-        }
-
-        // transform
-        // pivot
-        glm::vec2 pivot(0.5f, 0.5f);
-        glm::vec3 pivotOffset = glm::vec3((0.5f - pivot.x) * size.x, (0.5f - pivot.y) * size.y, 0.0f);
-
-        // model
-        glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)) // position (x,y)
-        * glm::rotate(glm::mat4(1.0f),glm::radians(rotationDeg),glm::vec3(0.0f, 0.0f, 1.0f)) // rotation
-        * glm::translate(glm::mat4(1.0f), pivotOffset)
-        * glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 1.0f)); // scale
-
-        static glm::vec4 vertexBasePositions[4] = {
-            { -0.5f, -0.5f, 0.0f, 1.0f }, // BL
-            {  0.5f, -0.5f, 0.0f, 1.0f }, // BR
-            {  0.5f,  0.5f, 0.0f, 1.0f }, // TR
-            { -0.5f,  0.5f, 0.0f, 1.0f }  // TL
-        };
-
-        static glm::vec2 textureCoords[4] = {
-            { 0.0f, 0.0f }, // BL
-            { 1.0f, 0.0f }, // BR
-            { 1.0f, 1.0f }, // TR
-            { 0.0f, 1.0f }  // TL
-        };
-
-        for (size_t i = 0; i < 4; i++) {
-            s_storage->quadVertexBufferPtr->position = transform * vertexBasePositions[i];
-            s_storage->quadVertexBufferPtr->color = color;
-            s_storage->quadVertexBufferPtr->TexCoord = textureCoords[i];
-            s_storage->quadVertexBufferPtr->textureIndex = textureIndex;
-            s_storage->quadVertexBufferPtr++;
-        }
-
-        s_storage->quadIndexCount += 6;
-        s_storage->stats.quadCount++;
-
-    }
 }

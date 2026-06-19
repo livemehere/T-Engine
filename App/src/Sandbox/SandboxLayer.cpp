@@ -22,8 +22,6 @@ void SandboxLayer::OnUpdate(float dt) {
 }
 
 void SandboxLayer::OnRender() {
-
-
     auto window = Engine::Application::Get().GetWindow();
     float width = static_cast<float>(window->GetWidth()) * 5;
     float height = static_cast<float>(window->GetHeight()) * 5;
@@ -41,7 +39,11 @@ void SandboxLayer::OnRender() {
         for (int y = 0; y < height; y += step) {
             glm::vec3 position(x + size.x / 2, y + size.y / 2, 2.0f);
             const bool useFirstTexture = ((x / step) + (y / step)) % 2 == 0;
-            Engine::Renderer2D::DrawQuad(position, size, useFirstTexture ? texture : texture2, color, rotationDeg);
+            if (useFirstTexture) {
+                Engine::Renderer2D::DrawCircle(position, size, texture , color, 1.0f, 0.0f, rotationDeg);
+            } else {
+                Engine::Renderer2D::DrawQuad(position, size, texture2, color, rotationDeg);
+            }
         }
     }
 
