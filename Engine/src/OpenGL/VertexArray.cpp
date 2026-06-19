@@ -58,12 +58,12 @@ namespace Engine {
                 reinterpret_cast<void *>(element.offset));
             }else {
                 glVertexAttribPointer(
-               attributeIndex,
-               GetShaderDataTypeCount(element.type),
-               ShaderDataTypeToOpenGLBaseType(element.type),
-               element.normalized ? GL_TRUE : GL_FALSE,
-               layout.GetStride(),
-               reinterpret_cast<void *>(element.offset));
+                attributeIndex,
+                GetShaderDataTypeCount(element.type),
+                ShaderDataTypeToOpenGLBaseType(element.type),
+                element.normalized ? GL_TRUE : GL_FALSE,
+                layout.GetStride(),
+                reinterpret_cast<void *>(element.offset));
             }
 
             attributeIndex++;

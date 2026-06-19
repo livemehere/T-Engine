@@ -18,13 +18,23 @@ namespace Engine {
         int textureIndex;
     };
 
+    struct CircleVertex {
+        glm::vec3 position;
+        glm::vec3 localPosition;
+        glm::vec4 color;
+        glm::vec2 TexCoord;
+        int textureIndex;
+        float thickness;
+        float fade;
+    };
+
     struct Renderer2DData {
         Renderer2D::Statistics stats;
 
+        // Quad
         std::unique_ptr<VertexArray> quadVAO;
         std::shared_ptr<VertexBuffer> quadVBO;
         Shader* quadShader = nullptr;
-        std::unique_ptr<Texture> whiteTexture;
 
         uint32_t quadIndexCount = 0; // total indices count of current frame
         std::unique_ptr<QuadVertex[]> quadVertexBuffers; // starting point
@@ -33,7 +43,22 @@ namespace Engine {
         int quadViewProjectionLoc = -1;
         int quadTexturesLoc = -1;
 
+
+        // Circle
+        std::unique_ptr<VertexArray> circleVAO;
+        std::shared_ptr<VertexBuffer> circleVBO;
+        Shader* circleShader = nullptr;
+
+        uint32_t circleIndexCount = 0;
+        std::unique_ptr<CircleVertex[]> circleVertexBuffers;
+        CircleVertex* circleVertexBufferPtr = nullptr;
+
+        int circleViewProjectionLoc = -1;
+        int circleTexturesLoc = -1;
+
+
         // texture
+        std::unique_ptr<Texture> whiteTexture;
         std::vector<Texture*> textureSlots;
         int textureSlotIndex = 1; // 0 = whiteTexture fixed;
 
@@ -52,21 +77,7 @@ namespace Engine {
     void Renderer2D::Init() {
         s_storage = std::make_unique<Renderer2DData>();
 
-        // -- Quad start --
-        s_storage->quadVAO = std::make_unique<VertexArray>();
-        // VBO
-        s_storage->quadVertexBuffers =  std::make_unique<QuadVertex[]>(MAX_QUAD_VERTICES);
-        auto quadVBO = std::make_shared<VertexBuffer>(nullptr, sizeof(QuadVertex) * MAX_QUAD_VERTICES);
-        quadVBO->SetLayout({
-            {ShaderDataType::Float3, "aPos"},
-            {ShaderDataType::Float4, "aColor"},
-            {ShaderDataType::Float2, "aTexCoord"},
-            {ShaderDataType::Int, "aTextureIndex"},
-        });
-        s_storage->quadVBO = std::move(quadVBO);
-        s_storage->quadVAO->AddVertexBuffer(s_storage->quadVBO);
-
-        // EBO
+        // Shared EBO
         auto* quadIndices = new uint32_t[MAX_QUAD_INDICES];
         uint32_t offset = 0;
 
@@ -80,16 +91,50 @@ namespace Engine {
             quadIndices[i + 5] = offset + 0;
             offset +=4;
         }
-        auto indexBuffer = std::make_shared<IndexBuffer>(quadIndices,MAX_QUAD_INDICES);
-        s_storage->quadVAO->SetIndexBuffer(indexBuffer);
+        auto quadIB = std::make_shared<IndexBuffer>(quadIndices,MAX_QUAD_INDICES);
         delete[] quadIndices;
+
+        // -- Quad start --
+        s_storage->quadVAO = std::make_unique<VertexArray>();
+        s_storage->quadVBO = std::make_shared<VertexBuffer>(nullptr, sizeof(QuadVertex) * MAX_QUAD_VERTICES);
+        s_storage->quadVBO->SetLayout({
+            {ShaderDataType::Float3, "aPos"},
+            {ShaderDataType::Float4, "aColor"},
+            {ShaderDataType::Float2, "aTexCoord"},
+            {ShaderDataType::Int, "aTextureIndex"},
+        });
+        s_storage->quadVAO->AddVertexBuffer(s_storage->quadVBO);
+        s_storage->quadVAO->SetIndexBuffer(quadIB);
+        s_storage->quadVertexBuffers =  std::make_unique<QuadVertex[]>(MAX_QUAD_VERTICES);
         // -- Quad end --
+
+        // -- Circle start --
+        s_storage->circleVAO = std::make_unique<VertexArray>();
+        s_storage->circleVBO = std::make_shared<VertexBuffer>(nullptr, sizeof(CircleVertex) * MAX_QUAD_VERTICES);
+        s_storage->circleVBO->SetLayout({
+            {ShaderDataType::Float3, "aPos"},
+            {ShaderDataType::Float3, "aLocalPos"},
+            {ShaderDataType::Float4, "aColor"},
+            {ShaderDataType::Float2, "aTexCoord"},
+            {ShaderDataType::Int, "aTextureIndex"},
+            {ShaderDataType::Float, "aThickness"},
+            {ShaderDataType::Float, "aFade"},
+        });
+        s_storage->circleVAO->AddVertexBuffer(s_storage->circleVBO);
+        s_storage->circleVAO->SetIndexBuffer(quadIB);
+        s_storage->circleVertexBuffers = std::make_unique<CircleVertex[]>(MAX_QUAD_VERTICES);
+        // -- Circle end --
 
         // shader setup
         s_storage->quadShader = AssetManager::AddShader("Renderer2D.Quad","shaders/Quad.vert","shaders/Quad.frag");
         s_storage->quadShader->Bind();
         s_storage->quadViewProjectionLoc =  glGetUniformLocation(s_storage->quadShader->GetId(), "uViewProjection");
         s_storage->quadTexturesLoc = glGetUniformLocation(s_storage->quadShader->GetId(), "uTextures");
+
+        s_storage->circleShader = AssetManager::AddShader("Renderer2D.Circle","shaders/Circle.vert","shaders/Circle.frag");
+        s_storage->circleShader->Bind();
+        s_storage->circleViewProjectionLoc =  glGetUniformLocation(s_storage->circleShader->GetId(), "uViewProjection");
+        s_storage->circleTexturesLoc = glGetUniformLocation(s_storage->circleShader->GetId(), "uTextures");
 
         // textures setup
         unsigned char whitePixel[] = { 255, 255, 255, 255 };
@@ -102,6 +147,7 @@ namespace Engine {
             samplers[i] = i;
         }
         glUniform1iv( s_storage->quadTexturesLoc, TEXTURE_SLOT_COUNT, samplers);
+        glUniform1iv( s_storage->circleTexturesLoc, TEXTURE_SLOT_COUNT, samplers);
 
     }
 
@@ -110,11 +156,11 @@ namespace Engine {
     }
 
     void Renderer2D::BeginScene(const glm::mat4& viewProjection) {
-        // shader
         s_storage->quadShader->Bind();
-
-        // camera
         glUniformMatrix4fv(s_storage->quadViewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
+
+        s_storage->circleShader->Bind();
+        glUniformMatrix4fv(s_storage->circleViewProjectionLoc, 1, GL_FALSE, glm::value_ptr(viewProjection));
 
         StartBatch();
     }
@@ -135,29 +181,33 @@ namespace Engine {
     }
 
     void Renderer2D::StartBatch() {
+        s_storage->textureSlotIndex = 1;
+
         s_storage->quadIndexCount = 0;
         s_storage->quadVertexBufferPtr = s_storage->quadVertexBuffers.get();
-        s_storage->textureSlotIndex = 1;
+
+        s_storage->circleIndexCount = 0;
+        s_storage->circleVertexBufferPtr = s_storage->circleVertexBuffers.get();
     }
 
     void Renderer2D::Flush() {
-        if (s_storage->quadIndexCount == 0) return;
+        if (s_storage->quadIndexCount) {
+            const auto dataSize = reinterpret_cast<uint8_t *>(s_storage->quadVertexBufferPtr) - reinterpret_cast<uint8_t *>(
+                                                      s_storage->quadVertexBuffers.get());
+            s_storage->quadVBO->SetData(s_storage->quadVertexBuffers.get(), dataSize);
 
-        const auto dataSize = reinterpret_cast<uint8_t *>(s_storage->quadVertexBufferPtr) - reinterpret_cast<uint8_t *>(
-                                                  s_storage->quadVertexBuffers.get());
-        s_storage->quadVBO->SetData(s_storage->quadVertexBuffers.get(), dataSize);
-
-        // only used texture slots activate
-        for (int i=0; i<s_storage->textureSlotIndex; i++) {
-            if (s_storage->textureSlots[i] != nullptr) {
-                s_storage->textureSlots[i]->Bind(i);
+            // only used texture slots activate
+            for (int i=0; i<s_storage->textureSlotIndex; i++) {
+                if (s_storage->textureSlots[i] != nullptr) {
+                    s_storage->textureSlots[i]->Bind(i);
+                }
             }
-        }
 
-        s_storage->quadVAO->Bind();
-        s_storage->quadShader->Bind();
-        glDrawElements(GL_TRIANGLES,s_storage->quadIndexCount, GL_UNSIGNED_INT, 0);
-        s_storage->stats.drawCalls++;
+            s_storage->quadVAO->Bind();
+            s_storage->quadShader->Bind();
+            glDrawElements(GL_TRIANGLES,s_storage->quadIndexCount, GL_UNSIGNED_INT, 0);
+            s_storage->stats.drawCalls++;
+        }
     }
 
 
