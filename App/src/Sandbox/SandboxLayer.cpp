@@ -47,6 +47,13 @@ void SandboxLayer::OnRender() {
     Engine::Renderer2D::DrawCircle({100.0f, 0.0f}, {50.0f, 50.0f},white);
     Engine::Renderer2D::DrawCircleOutline({100.0f, 0.0f}, {50.0f, 50.0f},red);
 
+    // triangle
+    // Engine::Renderer2D::DrawTriangle({0, 0}, {50, 0}, {25, 50}, {1, 0, 0, 1});
+    // Engine::Renderer2D::DrawTriangleLine({0, 0}, {50, 0}, {25, 50}, {0, 1, 0, 1}, 2.0f);
+
+    Engine::Renderer2D::DrawTriangle({0, 0}, {50, 50}, red, 30.0f);
+    Engine::Renderer2D::DrawTriangleLine({0, 0}, {50, 50}, red, 2.0f, 30.0f);
+
     Engine::Renderer2D::EndScene();
 
 }
