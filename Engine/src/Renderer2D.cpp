@@ -34,6 +34,12 @@ namespace Engine {
         { -1.0f,  1.0f, 0.0f }  // TL: circle shader local top-left
     };
 
+    static const glm::vec4 TRIANGLE_BASE_POSITIONS[3] = {
+        { -0.5f, -0.5f, 0.0f, 1.0f }, // BL
+        {  0.5f, -0.5f, 0.0f, 1.0f }, // BR
+        {  0.0f,  0.5f, 0.0f, 1.0f }  // Top
+    };
+
     struct QuadVertex {
         glm::vec3 position;
         glm::vec4 color;
@@ -282,6 +288,19 @@ namespace Engine {
         s_storage->stats.quadCount++;
     }
 
+    void Renderer2D::DrawTriangle(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+        float rotationDeg) {
+        if (size.x <= 0.0f || size.y <= 0.0f) {
+            return;
+        }
+
+        const glm::mat4 transform = GetTransform(position, size, rotationDeg);
+        const glm::vec2 p1 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[0]);
+        const glm::vec2 p2 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[1]);
+        const glm::vec2 p3 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[2]);
+        DrawTriangle(p1, p2, p3, color);
+    }
+
     void Renderer2D::DrawTriangle(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &p3,
         const glm::vec4 &color) {
         if (s_storage->quadIndexCount + 6 > MAX_QUAD_INDICES) {
@@ -306,6 +325,19 @@ namespace Engine {
 
         s_storage->quadIndexCount += 6;
         s_storage->stats.quadCount++;
+    }
+
+    void Renderer2D::DrawTriangleLine(const glm::vec2 &position, const glm::vec2 &size,
+        const glm::vec4 &color, float thickness, float rotationDeg) {
+        if (size.x <= 0.0f || size.y <= 0.0f) {
+            return;
+        }
+
+        const glm::mat4 transform = GetTransform(position, size, rotationDeg);
+        const glm::vec2 p1 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[0]);
+        const glm::vec2 p2 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[1]);
+        const glm::vec2 p3 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[2]);
+        DrawTriangleLine(p1, p2, p3, color, thickness);
     }
 
     void Renderer2D::DrawTriangleLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &p3,
