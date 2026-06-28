@@ -49,11 +49,11 @@ void SandboxLayer::OnRender() {
     const float primitiveY = 220.0f;
     // Quad
     Engine::Renderer2D::DrawQuad({-300.0f, primitiveY}, {50.0f, 50.0f},texture, white, deg);
-    Engine::Renderer2D::DrawQuadOutline({-300.0f, primitiveY}, {50.0f, 50.0f}, red, 2.0f, deg);
+    Engine::Renderer2D::DrawQuadLine({-300.0f, primitiveY}, {50.0f, 50.0f}, red, 2.0f, deg);
 
     // Circle
     Engine::Renderer2D::DrawCircle({-200.0f, primitiveY}, {50.0f, 50.0f},texture, white, 1.0f, 0.005f, deg);
-    Engine::Renderer2D::DrawCircleOutline({-200.0f, primitiveY}, {50.0f, 50.0f}, red, 1.0f, 0.005f, deg);
+    Engine::Renderer2D::DrawCircleLine({-200.0f, primitiveY}, {50.0f, 50.0f}, red, 1.0f, 0.005f, deg);
 
     // Triangle
     Engine::Renderer2D::DrawTriangle({-100.0f, primitiveY}, {50.0f, 50.0f},texture, white, deg);

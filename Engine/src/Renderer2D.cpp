@@ -606,7 +606,7 @@ namespace Engine {
         DrawQuad(center, { length, thickness }, texture, tintColor, rotationDeg);
     }
 
-    void Renderer2D::DrawQuadOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+    void Renderer2D::DrawQuadLine(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
         float thickness, float rotationDeg) {
         if (size.x <= 0.0f || size.y <= 0.0f || thickness <= 0.0f) {
             return;
@@ -627,7 +627,7 @@ namespace Engine {
         }
     }
 
-    void Renderer2D::DrawCircleOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+    void Renderer2D::DrawCircleLine(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
         float thickness, float fade, float rotationDeg) {
         if (size.x <= 0.0f || size.y <= 0.0f || thickness <= 0.0f) {
             return;
