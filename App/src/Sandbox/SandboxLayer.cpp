@@ -56,7 +56,7 @@ void SandboxLayer::OnRender() {
     Engine::Renderer2D::DrawCircleOutline({-200.0f, primitiveY}, {50.0f, 50.0f}, red, 1.0f, 0.005f, deg);
 
     // Triangle
-    Engine::Renderer2D::DrawTriangle({-100.0f, primitiveY}, {50.0f, 50.0f}, white, deg);
+    Engine::Renderer2D::DrawTriangle({-100.0f, primitiveY}, {50.0f, 50.0f},texture, white, deg);
     Engine::Renderer2D::DrawTriangleLine({-100.0f, primitiveY}, {50.0f, 50.0f}, red, 2.0f, deg);
 
     // Polygon (same ratio)
@@ -83,6 +83,7 @@ void SandboxLayer::OnRender() {
             position,
             polygonSize,
             static_cast<uint32_t>(side),
+            texture,
             white,
             deg
         );
@@ -112,6 +113,7 @@ void SandboxLayer::OnRender() {
             position,
             {90.0f, 50.0f},
             sideCount,
+            texture,
             white,
             deg
         );

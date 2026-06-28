@@ -40,6 +40,12 @@ namespace Engine {
         {  0.0f,  0.5f, 0.0f, 1.0f }  // Top
     };
 
+    static const glm::vec2 TRIANGLE_TEXTURE_COORDS[3] = {
+        { 0.0f, 0.0f }, // BL
+        { 1.0f, 0.0f }, // BR
+        { 0.5f, 1.0f }  // Top
+    };
+
     struct QuadVertex {
         glm::vec3 position;
         glm::vec4 color;
@@ -180,15 +186,24 @@ namespace Engine {
         points.reserve(sideCount);
         const float radiusX = size.x * 0.5f;
         const float radiusY = size.y * 0.5f;
+        const float rotationRad = glm::radians(rotationDeg);
+        const float cosRotation = glm::cos(rotationRad);
+        const float sinRotation = glm::sin(rotationRad);
 
-        const float startAngle = glm::half_pi<float>() + glm::radians(rotationDeg);
+        const float startAngle = glm::half_pi<float>();
         const float step = glm::two_pi<float>() / static_cast<float>(sideCount);
         for (uint32_t i = 0; i < sideCount; i++) {
             const float angle = startAngle + step * static_cast<float>(i);
-            points.emplace_back(
-                position.x + glm::cos(angle) * radiusX,
-                position.y + glm::sin(angle) * radiusY
+            const glm::vec2 localPosition(
+                glm::cos(angle) * radiusX,
+                glm::sin(angle) * radiusY
             );
+            const glm::vec2 rotatedPosition(
+                localPosition.x * cosRotation - localPosition.y * sinRotation,
+                localPosition.x * sinRotation + localPosition.y * cosRotation
+            );
+
+            points.emplace_back(position + rotatedPosition);
         }
         return points;
     }
@@ -352,6 +367,11 @@ namespace Engine {
 
     void Renderer2D::DrawTriangle(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
         float rotationDeg) {
+        DrawTriangle(position, size, s_storage->whiteTexture.get(), color, rotationDeg);
+    }
+
+    void Renderer2D::DrawTriangle(const glm::vec2 &position, const glm::vec2 &size, Texture* texture,
+        const glm::vec4 &tintColor, float rotationDeg) {
         if (size.x <= 0.0f || size.y <= 0.0f) {
             return;
         }
@@ -360,28 +380,53 @@ namespace Engine {
         const glm::vec2 p1 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[0]);
         const glm::vec2 p2 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[1]);
         const glm::vec2 p3 = glm::vec2(transform * TRIANGLE_BASE_POSITIONS[2]);
-        DrawTriangle(p1, p2, p3, color);
+        DrawTriangle(p1, p2, p3, texture, tintColor);
     }
 
     void Renderer2D::DrawTriangle(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &p3,
         const glm::vec4 &color) {
+        DrawTriangle(p1, p2, p3, s_storage->whiteTexture.get(), color);
+    }
+
+    void Renderer2D::DrawTriangle(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &p3,
+        Texture* texture, const glm::vec4 &tintColor) {
+        DrawTriangleWithUV(
+            p1, p2, p3,
+            TRIANGLE_TEXTURE_COORDS[0],
+            TRIANGLE_TEXTURE_COORDS[1],
+            TRIANGLE_TEXTURE_COORDS[2],
+            texture,
+            tintColor
+        );
+    }
+
+    void Renderer2D::DrawTriangleWithUV(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &p3,
+        const glm::vec2 &uv1, const glm::vec2 &uv2, const glm::vec2 &uv3, Texture* texture,
+        const glm::vec4 &tintColor) {
         if (s_storage->quadIndexCount + 6 > MAX_QUAD_INDICES) {
             Flush();
             StartBatch();
         }
 
+        const int textureIndex = GetTextureIndex(texture);
         const glm::vec3 positions[4] = {
             {p1.x, p1.y, 0.0f},
             {p2.x, p2.y, 0.0f},
             {p3.x, p3.y, 0.0f},
             {p1.x, p1.y, 0.0f}
         };
+        const glm::vec2 texCoords[4] = {
+            uv1,
+            uv2,
+            uv3,
+            uv1
+        };
 
         for (size_t i = 0; i < 4; i++) {
             s_storage->quadVertexBufferPtr->position = positions[i];
-            s_storage->quadVertexBufferPtr->color = color;
-            s_storage->quadVertexBufferPtr->TexCoord = TEXTURE_COORDS[i];
-            s_storage->quadVertexBufferPtr->textureIndex = 0;
+            s_storage->quadVertexBufferPtr->color = tintColor;
+            s_storage->quadVertexBufferPtr->TexCoord = texCoords[i];
+            s_storage->quadVertexBufferPtr->textureIndex = textureIndex;
             s_storage->quadVertexBufferPtr++;
         }
 
@@ -422,6 +467,57 @@ namespace Engine {
         DrawPolygon(points, color);
     }
 
+    void Renderer2D::DrawPolygon(const glm::vec2& position, const glm::vec2& size, uint32_t sideCount,
+        Texture* texture, const glm::vec4& tintColor, float rotationDeg) {
+        if (sideCount < 3 || size.x <= 0.0f || size.y <= 0.0f) {
+            return;
+        }
+
+        std::vector<glm::vec2> points;
+        std::vector<glm::vec2> texCoords;
+        points.reserve(sideCount);
+        texCoords.reserve(sideCount);
+
+        const float radiusX = size.x * 0.5f;
+        const float radiusY = size.y * 0.5f;
+        const float rotationRad = glm::radians(rotationDeg);
+        const float cosRotation = glm::cos(rotationRad);
+        const float sinRotation = glm::sin(rotationRad);
+        const float startAngle = glm::half_pi<float>();
+        const float step = glm::two_pi<float>() / static_cast<float>(sideCount);
+
+        for (uint32_t i = 0; i < sideCount; i++) {
+            const float angle = startAngle + step * static_cast<float>(i);
+            const glm::vec2 localPosition(
+                glm::cos(angle) * radiusX,
+                glm::sin(angle) * radiusY
+            );
+            const glm::vec2 rotatedPosition(
+                localPosition.x * cosRotation - localPosition.y * sinRotation,
+                localPosition.x * sinRotation + localPosition.y * cosRotation
+            );
+
+            points.emplace_back(position + rotatedPosition);
+            texCoords.emplace_back(
+                (localPosition.x / radiusX) * 0.5f + 0.5f,
+                (localPosition.y / radiusY) * 0.5f + 0.5f
+            );
+        }
+
+        for (size_t i = 1; i + 1 < points.size(); i++) {
+            DrawTriangleWithUV(
+                points[0],
+                points[i],
+                points[i + 1],
+                texCoords[0],
+                texCoords[i],
+                texCoords[i + 1],
+                texture,
+                tintColor
+            );
+        }
+    }
+
     void Renderer2D::DrawPolygonLine(const glm::vec2& position, const glm::vec2& size, uint32_t sideCount, const glm::vec4& color, float thickness, float rotationDeg) {
         const std::vector<glm::vec2> points = CreateRegularPolygonPoints(position, size, sideCount, rotationDeg);
         DrawPolygonLine(points, color, thickness);
@@ -434,6 +530,45 @@ namespace Engine {
 
         for (size_t i = 1; i + 1 < points.size(); i++) {
             DrawTriangle(points[0], points[i], points[i + 1], color);
+        }
+    }
+
+    void Renderer2D::DrawPolygon(const std::vector<glm::vec2>& points, Texture* texture, const glm::vec4& tintColor) {
+        if (points.size() < 3) {
+            return;
+        }
+
+        glm::vec2 minPoint = points[0];
+        glm::vec2 maxPoint = points[0];
+        for (const auto& point : points) {
+            minPoint = glm::min(minPoint, point);
+            maxPoint = glm::max(maxPoint, point);
+        }
+
+        const glm::vec2 size = maxPoint - minPoint;
+        if (size.x <= 0.0f || size.y <= 0.0f) {
+            DrawPolygon(points, tintColor);
+            return;
+        }
+
+        const auto getUV = [&](const glm::vec2& point) {
+            return glm::vec2(
+                (point.x - minPoint.x) / size.x,
+                (point.y - minPoint.y) / size.y
+            );
+        };
+
+        for (size_t i = 1; i + 1 < points.size(); i++) {
+            DrawTriangleWithUV(
+                points[0],
+                points[i],
+                points[i + 1],
+                getUV(points[0]),
+                getUV(points[i]),
+                getUV(points[i + 1]),
+                texture,
+                tintColor
+            );
         }
     }
 
@@ -455,6 +590,11 @@ namespace Engine {
     }
 
     void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec4 &color, float thickness) {
+        DrawLine(p1, p2, s_storage->whiteTexture.get(), color, thickness);
+    }
+
+    void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, Texture* texture,
+        const glm::vec4 &tintColor, float thickness) {
         const glm::vec2 delta = p2 - p1;
         const float length = glm::length(delta);
         if (length <= 0.0f || thickness <= 0.0f) {
@@ -463,7 +603,7 @@ namespace Engine {
 
         const glm::vec2 center = (p1 + p2) * 0.5f;
         const float rotationDeg = glm::degrees(std::atan2(delta.y, delta.x));
-        DrawQuad(center, { length, thickness }, color, rotationDeg);
+        DrawQuad(center, { length, thickness }, texture, tintColor, rotationDeg);
     }
 
     void Renderer2D::DrawQuadOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
