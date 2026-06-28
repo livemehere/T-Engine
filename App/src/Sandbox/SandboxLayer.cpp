@@ -23,29 +23,16 @@ void SandboxLayer::OnUpdate(float dt) {
 
 void SandboxLayer::OnRender() {
     auto window = Engine::Application::Get().GetWindow();
-    float width = static_cast<float>(window->GetWidth()) * 5;
-    float height = static_cast<float>(window->GetHeight()) * 5;
-
-    static int gap = 5;
-    static glm::vec2 size(10.0f, 10.0f);
-    static float rotationDeg = 0.0f;
-    static glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
-    const int step = static_cast<int>(size.x) + gap;
-    rotationDeg += 1.0f;
+    float width = static_cast<float>(window->GetWidth());
+    float height = static_cast<float>(window->GetHeight());
 
     Engine::Renderer2D::BeginScene(m_camera->GetViewProjection());
 
-    for (int x = 0; x < width; x += step) {
-        for (int y = 0; y < height; y += step) {
-            glm::vec3 position(x + size.x / 2, y + size.y / 2, 2.0f);
-            const bool useFirstTexture = ((x / step) + (y / step)) % 2 == 0;
-            if (useFirstTexture) {
-                Engine::Renderer2D::DrawCircle(position, size, texture , color, 1.0f, 0.0f, rotationDeg);
-            } else {
-                Engine::Renderer2D::DrawQuad(position, size, texture2, color, rotationDeg);
-            }
-        }
-    }
+    // XY-Axis
+    Engine::Renderer2D::DrawLine({0, 1000.0f}, {0, -1000.0f}, {255.0f, 0.0f,0.0f, 1.0f});
+    Engine::Renderer2D::DrawLine({1000.0f, 0.0f}, {-1000.0f, 0.0f}, {0.0f, 255.0f,0.0f, 1.0f});
+
+    Engine::Renderer2D::DrawQuad({0.0f, 0.0f}, {50,50}, {255.0f, 255.0f,255.0f, 1.0f});
 
     Engine::Renderer2D::EndScene();
 
