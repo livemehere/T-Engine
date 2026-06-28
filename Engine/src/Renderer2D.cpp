@@ -169,6 +169,30 @@ namespace Engine {
         drawMiterSide(-prevNormal, -nextNormal);
     }
 
+    std::vector<glm::vec2> Renderer2D::CreateRegularPolygonPoints(const glm::vec2 &position, const glm::vec2 &size,
+        uint32_t sideCount, float rotationDeg) {
+        std::vector<glm::vec2> points;
+
+        if (sideCount < 3 || size.x <= 0.0f || size.y <= 0.0f) {
+            return points;
+        }
+
+        points.reserve(sideCount);
+        const float radiusX = size.x * 0.5f;
+        const float radiusY = size.y * 0.5f;
+
+        const float startAngle = glm::half_pi<float>() + glm::radians(rotationDeg);
+        const float step = glm::two_pi<float>() / static_cast<float>(sideCount);
+        for (uint32_t i = 0; i < sideCount; i++) {
+            const float angle = startAngle + step * static_cast<float>(i);
+            points.emplace_back(
+                position.x + glm::cos(angle) * radiusX,
+                position.y + glm::sin(angle) * radiusY
+            );
+        }
+        return points;
+    }
+
     void Renderer2D::Init() {
         s_storage = std::make_unique<Renderer2DData>();
 
@@ -391,6 +415,16 @@ namespace Engine {
         FillMiterJoin(p3, p1, p2, color, thickness);
         FillMiterJoin(p1, p2, p3, color, thickness);
         FillMiterJoin(p2, p3, p1, color, thickness);
+    }
+
+    void Renderer2D::DrawPolygon(const glm::vec2& position, const glm::vec2& size,uint32_t sideCount, const glm::vec4& color, float rotationDeg) {
+        const std::vector<glm::vec2> points = CreateRegularPolygonPoints(position, size, sideCount, rotationDeg);
+        DrawPolygon(points, color);
+    }
+
+    void Renderer2D::DrawPolygonLine(const glm::vec2& position, const glm::vec2& size, uint32_t sideCount, const glm::vec4& color, float thickness, float rotationDeg) {
+        const std::vector<glm::vec2> points = CreateRegularPolygonPoints(position, size, sideCount, rotationDeg);
+        DrawPolygonLine(points, color, thickness);
     }
 
     void Renderer2D::DrawPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color) {
