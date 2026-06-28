@@ -131,6 +131,44 @@ namespace Engine {
         * glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 1.0f));
     }
 
+    void Renderer2D::FillMiterJoin(const glm::vec2& prev, const glm::vec2& current, const glm::vec2& next,
+        const glm::vec4& color, float thickness) {
+        const glm::vec2 prevDelta = current - prev;
+        const glm::vec2 nextDelta = next - current;
+        const float prevLength = glm::length(prevDelta);
+        const float nextLength = glm::length(nextDelta);
+        if (prevLength <= 0.0f || nextLength <= 0.0f || thickness <= 0.0f) {
+            return;
+        }
+
+        const auto cross = [](const glm::vec2& a, const glm::vec2& b) {
+            return a.x * b.y - a.y * b.x;
+        };
+
+        const glm::vec2 prevDir = prevDelta / prevLength;
+        const glm::vec2 nextDir = nextDelta / nextLength;
+        const glm::vec2 prevNormal = glm::vec2(-prevDir.y, prevDir.x) * thickness * 0.5f;
+        const glm::vec2 nextNormal = glm::vec2(-nextDir.y, nextDir.x) * thickness * 0.5f;
+
+        const auto drawMiterSide = [&](const glm::vec2& normalA, const glm::vec2& normalB) {
+            const glm::vec2 lineA = current + normalA;
+            const glm::vec2 lineB = current + normalB;
+            const float denominator = cross(prevDir, nextDir);
+            if (glm::abs(denominator) <= 0.0001f) {
+                DrawTriangle(current, lineA, lineB, color);
+                return;
+            }
+
+            const float t = cross(lineB - lineA, nextDir) / denominator;
+            const glm::vec2 miter = lineA + prevDir * t;
+            DrawTriangle(current, lineA, miter, color);
+            DrawTriangle(current, miter, lineB, color);
+        };
+
+        drawMiterSide(prevNormal, nextNormal);
+        drawMiterSide(-prevNormal, -nextNormal);
+    }
+
     void Renderer2D::Init() {
         s_storage = std::make_unique<Renderer2DData>();
 
@@ -350,46 +388,36 @@ namespace Engine {
         DrawLine(p2, p3, color, thickness);
         DrawLine(p3, p1, color, thickness);
 
-        const auto cross = [](const glm::vec2& a, const glm::vec2& b) {
-            return a.x * b.y - a.y * b.x;
-        };
+        FillMiterJoin(p3, p1, p2, color, thickness);
+        FillMiterJoin(p1, p2, p3, color, thickness);
+        FillMiterJoin(p2, p3, p1, color, thickness);
+    }
 
-        const auto fillJoin = [&](const glm::vec2& prev, const glm::vec2& current, const glm::vec2& next) {
-            const glm::vec2 prevDelta = current - prev;
-            const glm::vec2 nextDelta = next - current;
-            const float prevLength = glm::length(prevDelta);
-            const float nextLength = glm::length(nextDelta);
-            if (prevLength <= 0.0f || nextLength <= 0.0f) {
-                return;
-            }
+    void Renderer2D::DrawPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color) {
+        if (points.size() < 3) {
+            return;
+        }
 
-            const glm::vec2 prevDir = prevDelta / prevLength;
-            const glm::vec2 nextDir = nextDelta / nextLength;
-            const glm::vec2 prevNormal = glm::vec2(-prevDir.y, prevDir.x) * thickness * 0.5f;
-            const glm::vec2 nextNormal = glm::vec2(-nextDir.y, nextDir.x) * thickness * 0.5f;
+        for (size_t i = 1; i + 1 < points.size(); i++) {
+            DrawTriangle(points[0], points[i], points[i + 1], color);
+        }
+    }
 
-            const auto drawMiterSide = [&](const glm::vec2& normalA, const glm::vec2& normalB) {
-                const glm::vec2 lineA = current + normalA;
-                const glm::vec2 lineB = current + normalB;
-                const float denominator = cross(prevDir, nextDir);
-                if (glm::abs(denominator) <= 0.0001f) {
-                    DrawTriangle(current, lineA, lineB, color);
-                    return;
-                }
+    void Renderer2D::DrawPolygonLine(const std::vector<glm::vec2>& points, const glm::vec4& color, float thickness) {
+        if (points.size() < 3 || thickness <= 0.0f) {
+            return;
+        }
 
-                const float t = cross(lineB - lineA, nextDir) / denominator;
-                const glm::vec2 miter = lineA + prevDir * t;
-                DrawTriangle(current, lineA, miter, color);
-                DrawTriangle(current, miter, lineB, color);
-            };
+        for (size_t i = 0; i < points.size(); i++) {
+            DrawLine(points[i], points[(i + 1) % points.size()], color, thickness);
+        }
 
-            drawMiterSide(prevNormal, nextNormal);
-            drawMiterSide(-prevNormal, -nextNormal);
-        };
-
-        fillJoin(p3, p1, p2);
-        fillJoin(p1, p2, p3);
-        fillJoin(p2, p3, p1);
+        for (size_t i = 0; i < points.size(); i++) {
+            const glm::vec2& prev = points[(i + points.size() - 1) % points.size()];
+            const glm::vec2& current = points[i];
+            const glm::vec2& next = points[(i + 1) % points.size()];
+            FillMiterJoin(prev, current, next, color, thickness);
+        }
     }
 
     void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec4 &color, float thickness) {
