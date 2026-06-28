@@ -282,6 +282,54 @@ namespace Engine {
         s_storage->stats.quadCount++;
     }
 
+    void Renderer2D::DrawTriangle(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &p3,
+        const glm::vec4 &color) {
+        if (s_storage->quadIndexCount + 6 > MAX_QUAD_INDICES) {
+            Flush();
+            StartBatch();
+        }
+
+        const glm::vec3 positions[4] = {
+            {p1.x, p1.y, 0.0f},
+            {p2.x, p2.y, 0.0f},
+            {p3.x, p3.y, 0.0f},
+            {p1.x, p1.y, 0.0f}
+        };
+
+        for (size_t i = 0; i < 4; i++) {
+            s_storage->quadVertexBufferPtr->position = positions[i];
+            s_storage->quadVertexBufferPtr->color = color;
+            s_storage->quadVertexBufferPtr->TexCoord = TEXTURE_COORDS[i];
+            s_storage->quadVertexBufferPtr->textureIndex = 0;
+            s_storage->quadVertexBufferPtr++;
+        }
+
+        s_storage->quadIndexCount += 6;
+        s_storage->stats.quadCount++;
+    }
+
+    void Renderer2D::DrawTriangleLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &p3,
+        const glm::vec4 &color, float thickness) {
+        if (thickness <= 0.0f) {
+            return;
+        }
+
+        const glm::vec2 points[3] = {p1, p2, p3};
+        for (size_t i = 0; i < 3; i++) {
+            const glm::vec2 start = points[i];
+            const glm::vec2 end = points[(i + 1) % 3];
+            const glm::vec2 delta = end - start;
+            const float length = glm::length(delta);
+            if (length <= 0.0f) {
+                continue;
+            }
+
+            const glm::vec2 direction = delta / length;
+            const glm::vec2 extension = direction * thickness * 0.5f;
+            DrawLine(start - extension, end + extension, color, thickness);
+        }
+    }
+
     void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec4 &color, float thickness) {
         const glm::vec2 delta = p2 - p1;
         const float length = glm::length(delta);
