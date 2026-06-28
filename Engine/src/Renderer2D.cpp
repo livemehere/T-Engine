@@ -4,6 +4,7 @@
 #include "OpenGL/VertexArray.h"
 #include "Resource/AssetManager.h"
 
+
 namespace Engine {
 
     static constexpr uint32_t TEXTURE_SLOT_COUNT = 16;
@@ -279,6 +280,18 @@ namespace Engine {
 
         s_storage->circleIndexCount += 6;
         s_storage->stats.quadCount++;
+    }
+
+    void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec4 &color, float thickness) {
+        const glm::vec2 delta = p2 - p1;
+        const float length = glm::length(delta);
+        if (length <= 0.0f || thickness <= 0.0f) {
+            return;
+        }
+
+        const glm::vec2 center = (p1 + p2) * 0.5f;
+        const float rotationDeg = glm::degrees(std::atan2(delta.y, delta.x));
+        DrawQuad(center, { length, thickness }, color, rotationDeg);
     }
 
     void Renderer2D::StartBatch() {
