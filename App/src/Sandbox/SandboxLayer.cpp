@@ -29,15 +29,19 @@ void SandboxLayer::OnRender() {
     auto white = glm::vec4{255.0f, 255.0f,255.0f, 1.0f};
     auto red = glm::vec4{255.0f, 0.0f,0.0f, 1.0f};
 
+
     Engine::Renderer2D::BeginScene(m_camera->GetViewProjection());
 
     // XY-Axis
     Engine::Renderer2D::DrawLine({0, 1000.0f}, {0, -1000.0f}, {255.0f, 0.0f,0.0f, 1.0f});
     Engine::Renderer2D::DrawLine({1000.0f, 0.0f}, {-1000.0f, 0.0f}, {0.0f, 255.0f,0.0f, 1.0f});
 
+
+    static float deg = 0;
+    deg += 1;
     // rect
-    Engine::Renderer2D::DrawQuad({0.0f, 0.0f}, {50,50}, white);
-    Engine::Renderer2D::DrawQuadOutline({0.0f, 0.0f}, {50,50}, red);
+    Engine::Renderer2D::DrawQuad({0.0f, 0.0f}, {50,50}, white,deg);
+    Engine::Renderer2D::DrawQuadOutline({0.0f, 0.0f}, {50,50}, red,1.0f, deg);
 
     // circle
     Engine::Renderer2D::DrawCircle({100.0f, 0.0f}, {50.0f, 50.0f},white);
