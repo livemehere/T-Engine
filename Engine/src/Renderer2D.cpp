@@ -306,10 +306,13 @@ namespace Engine {
             corners[i] = glm::vec2(transform * VERTEX_BASE_POSITIONS[i]);
         }
 
-        DrawLine(corners[0], corners[1], color, thickness);
-        DrawLine(corners[1], corners[2], color, thickness);
-        DrawLine(corners[2], corners[3], color, thickness);
-        DrawLine(corners[3], corners[0], color, thickness);
+        for (size_t i = 0; i < 4; i++) {
+            const glm::vec2 start = corners[i];
+            const glm::vec2 end = corners[(i + 1) % 4];
+            const glm::vec2 direction = glm::normalize(end - start);
+            const glm::vec2 extension = direction * thickness * 0.5f;
+            DrawLine(start - extension, end + extension, color, thickness);
+        }
     }
 
     void Renderer2D::DrawCircleOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
