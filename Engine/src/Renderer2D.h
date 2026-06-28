@@ -26,6 +26,8 @@ namespace Engine {
         static void DrawCircle(const glm::vec2& position, const glm::vec2& size, Texture* texture, const glm::vec4& tintColor = glm::vec4(1.0f), float thickness = 1.0f, float fade = 0.005f, float rotationDeg = 0.0f);
 
         static void DrawLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, float thickness = 1.0f);
+        static void DrawQuadOutline(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float thickness = 1.0f, float rotationDeg = 0.0f);
+        static void DrawCircleOutline(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float thickness = 0.1f, float fade = 0.005f, float rotationDeg = 0.0f);
 
     private:
         static void StartBatch();

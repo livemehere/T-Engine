@@ -26,13 +26,22 @@ void SandboxLayer::OnRender() {
     float width = static_cast<float>(window->GetWidth());
     float height = static_cast<float>(window->GetHeight());
 
+    auto white = glm::vec4{255.0f, 255.0f,255.0f, 1.0f};
+    auto red = glm::vec4{255.0f, 0.0f,0.0f, 1.0f};
+
     Engine::Renderer2D::BeginScene(m_camera->GetViewProjection());
 
     // XY-Axis
     Engine::Renderer2D::DrawLine({0, 1000.0f}, {0, -1000.0f}, {255.0f, 0.0f,0.0f, 1.0f});
     Engine::Renderer2D::DrawLine({1000.0f, 0.0f}, {-1000.0f, 0.0f}, {0.0f, 255.0f,0.0f, 1.0f});
 
-    Engine::Renderer2D::DrawQuad({0.0f, 0.0f}, {50,50}, {255.0f, 255.0f,255.0f, 1.0f});
+    // rect
+    Engine::Renderer2D::DrawQuad({0.0f, 0.0f}, {50,50}, white);
+    Engine::Renderer2D::DrawQuadOutline({0.0f, 0.0f}, {50,50}, red);
+
+    // circle
+    Engine::Renderer2D::DrawCircle({100.0f, 0.0f}, {50.0f, 50.0f},white);
+    Engine::Renderer2D::DrawCircleOutline({100.0f, 0.0f}, {50.0f, 50.0f},red);
 
     Engine::Renderer2D::EndScene();
 

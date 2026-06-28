@@ -294,6 +294,33 @@ namespace Engine {
         DrawQuad(center, { length, thickness }, color, rotationDeg);
     }
 
+    void Renderer2D::DrawQuadOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+        float thickness, float rotationDeg) {
+        if (size.x <= 0.0f || size.y <= 0.0f || thickness <= 0.0f) {
+            return;
+        }
+
+        const glm::mat4 transform = GetTransform(position, size, rotationDeg);
+        glm::vec2 corners[4];
+        for (size_t i = 0; i < 4; i++) {
+            corners[i] = glm::vec2(transform * VERTEX_BASE_POSITIONS[i]);
+        }
+
+        DrawLine(corners[0], corners[1], color, thickness);
+        DrawLine(corners[1], corners[2], color, thickness);
+        DrawLine(corners[2], corners[3], color, thickness);
+        DrawLine(corners[3], corners[0], color, thickness);
+    }
+
+    void Renderer2D::DrawCircleOutline(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color,
+        float thickness, float fade, float rotationDeg) {
+        if (size.x <= 0.0f || size.y <= 0.0f || thickness <= 0.0f) {
+            return;
+        }
+
+        DrawCircle(position, size, color, thickness, fade, rotationDeg);
+    }
+
     void Renderer2D::StartBatch() {
         s_storage->textureSlotIndex = 1;
 
