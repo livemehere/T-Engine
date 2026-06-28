@@ -14,20 +14,22 @@ https://github.com/user-attachments/assets/400fea33-e555-4ee4-ad3e-6cbaa22a639e
 
 https://github.com/user-attachments/assets/dc0eb929-e556-4b05-b010-6846f9271d24
 
+### Shapes
+
+- Quad
+- Circle
+- Triangle
+- Polygon
+- Line
+
 ---
 
 ## TODO
 
-- [ ] refactor OpenGL classes
-- [ ] Renderer2D
-
-
----
-
 - [x] Basic Render System
 - [x] Camera System
 - [x] Render2D with Texture
-- [ ] Render2D primitives shapes
+- [x] Render2D primitives shapes
 - [ ] Render2D with Sprite Texture
 - [ ] Render2D with Animation of Sprite Texture
 - [ ] Scene System
