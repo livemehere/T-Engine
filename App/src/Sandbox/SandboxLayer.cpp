@@ -10,6 +10,16 @@
 SandboxLayer::SandboxLayer(const std::string& name, std::shared_ptr<Engine::OrthographicCamera> camera)
     : Layer(name), m_camera(std::move(camera)), m_cameraController(m_camera) {
 
+    const auto window = Engine::Application::Get().GetWindow();
+    const auto width = static_cast<float>(window->GetWidth());
+    const auto height = static_cast<float>(window->GetHeight());
+
+    m_camera->SetPosition({
+        -width/2.0f,
+        -height/2.0f,
+        0.0f
+    });
+
     texture = Engine::AssetManager::AddTexture("noir", "textures/noir.png");
     texture2 = Engine::AssetManager::AddTexture("spider", "textures/spider.png");
 
@@ -22,42 +32,103 @@ void SandboxLayer::OnUpdate(float dt) {
 }
 
 void SandboxLayer::OnRender() {
-    auto window = Engine::Application::Get().GetWindow();
-    float width = static_cast<float>(window->GetWidth());
-    float height = static_cast<float>(window->GetHeight());
 
-    auto white = glm::vec4{255.0f, 255.0f,255.0f, 1.0f};
-    auto red = glm::vec4{255.0f, 0.0f,0.0f, 1.0f};
-
+    auto white = glm::vec4{255.0f, 255.0f, 255.0f, 1.0f};
+    auto red   = glm::vec4{255.0f, 0.0f,   0.0f,   1.0f};
+    auto green = glm::vec4{0.0f,   255.0f, 0.0f,   1.0f};
 
     Engine::Renderer2D::BeginScene(m_camera->GetViewProjection());
 
     // XY-Axis
-    Engine::Renderer2D::DrawLine({0, 1000.0f}, {0, -1000.0f}, {255.0f, 0.0f,0.0f, 1.0f});
-    Engine::Renderer2D::DrawLine({1000.0f, 0.0f}, {-1000.0f, 0.0f}, {0.0f, 255.0f,0.0f, 1.0f});
+    Engine::Renderer2D::DrawLine({0.0f, 1000.0f}, {0.0f, -1000.0f}, red, 1.0f);
+    Engine::Renderer2D::DrawLine({1000.0f, 0.0f}, {-1000.0f, 0.0f}, green, 1.0f);
 
+    static float deg = 0.0f;
+    deg += 1.0f;
 
-    static float deg = 0;
-    deg += 1;
-    // rect
-    Engine::Renderer2D::DrawQuad({0.0f, 0.0f}, {50,50}, white,deg);
-    Engine::Renderer2D::DrawQuadOutline({0.0f, 0.0f}, {50,50}, red,1.0f, deg);
+    const float primitiveY = 220.0f;
+    // Quad
+    Engine::Renderer2D::DrawQuad({-300.0f, primitiveY}, {50.0f, 50.0f}, white, deg);
+    Engine::Renderer2D::DrawQuadOutline({-300.0f, primitiveY}, {50.0f, 50.0f}, red, 2.0f, deg);
 
-    // circle
-    Engine::Renderer2D::DrawCircle({100.0f, 0.0f}, {50.0f, 50.0f},white);
-    Engine::Renderer2D::DrawCircleOutline({100.0f, 0.0f}, {50.0f, 50.0f},red);
+    // Circle
+    Engine::Renderer2D::DrawCircle({-200.0f, primitiveY}, {50.0f, 50.0f}, white);
+    Engine::Renderer2D::DrawCircleOutline({-200.0f, primitiveY}, {50.0f, 50.0f}, red, 2.0f);
 
-    // triangle
-    Engine::Renderer2D::DrawTriangle({0, 0}, {50, 50}, white, deg);
-    Engine::Renderer2D::DrawTriangleLine({0, 0}, {50, 50}, red, 2.0f, deg);
+    // Triangle
+    Engine::Renderer2D::DrawTriangle({-100.0f, primitiveY}, {50.0f, 50.0f}, white, deg);
+    Engine::Renderer2D::DrawTriangleLine({-100.0f, primitiveY}, {50.0f, 50.0f}, red, 2.0f, deg);
 
-    // polygon
-    Engine::Renderer2D::DrawPolygon({200,200}, {50,50}, 6, white,deg);
-    Engine::Renderer2D::DrawPolygonLine({200,200}, {50,50}, 6, red, 1.0f,deg);
+    // Polygon (same ratio)
+    const glm::vec2 start = {-300.0f, 80.0f};
+    const glm::vec2 cellGap = {110.0f, -110.0f};
+    const glm::vec2 polygonSize = {60.0f, 60.0f};
+
+    const int columns = 5;
+    const int firstSide = 3;
+    const int lastSide = 12;
+
+    for (int side = firstSide; side <= lastSide; side++) {
+        const int index = side - firstSide;
+
+        const int col = index % columns;
+        const int row = index / columns;
+
+        const glm::vec2 position = {
+            start.x + static_cast<float>(col) * cellGap.x,
+            start.y + static_cast<float>(row) * cellGap.y
+        };
+
+        Engine::Renderer2D::DrawPolygon(
+            position,
+            polygonSize,
+            static_cast<uint32_t>(side),
+            white,
+            deg
+        );
+
+        Engine::Renderer2D::DrawPolygonLine(
+            position,
+            polygonSize,
+            static_cast<uint32_t>(side),
+            red,
+            2.0f,
+            deg
+        );
+    }
+
+    // Polygon (diff ratio)
+    const glm::vec2 ellipseStart = {-300.0f, -130.0f};
+
+    for (int i = 0; i < 5; i++) {
+        const uint32_t sideCount = static_cast<uint32_t>(3 + i * 3);
+
+        const glm::vec2 position = {
+            ellipseStart.x + static_cast<float>(i) * 130.0f,
+            ellipseStart.y
+        };
+
+        Engine::Renderer2D::DrawPolygon(
+            position,
+            {90.0f, 50.0f},
+            sideCount,
+            white,
+            deg
+        );
+
+        Engine::Renderer2D::DrawPolygonLine(
+            position,
+            {90.0f, 50.0f},
+            sideCount,
+            red,
+            2.0f,
+            deg
+        );
+    }
 
     Engine::Renderer2D::EndScene();
-
 }
+
 
 void SandboxLayer::OnAttach() {
     LOG_INFO("Attach Sandbox Layer");

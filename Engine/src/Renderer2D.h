@@ -37,9 +37,6 @@ namespace Engine {
         static void DrawPolygon(const glm::vec2& position, const glm::vec2& size,uint32_t sideCount, const glm::vec4& color, float rotationDeg = 0.0f);
         static void DrawPolygonLine(const glm::vec2& position, const glm::vec2& size,uint32_t sideCount, const glm::vec4& color, float thickness, float rotationDeg = 0.0f);
 
-        static void DrawPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color);
-        static void DrawPolygonLine(const std::vector<glm::vec2>& points, const glm::vec4& color, float thickness = 1.0f);
-
         static void DrawQuadOutline(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float thickness = 1.0f, float rotationDeg = 0.0f);
 
         static void DrawCircleOutline(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float thickness = 1.0f, float fade = 0.005f, float rotationDeg = 0.0f);
@@ -52,6 +49,8 @@ namespace Engine {
         static glm::mat4 GetTransform(const glm::vec2& position, const glm::vec2& size, float rotationDeg);
         static void FillMiterJoin(const glm::vec2& prev, const glm::vec2& current, const glm::vec2& next, const glm::vec4& color, float thickness);
 
+        static void DrawPolygon(const std::vector<glm::vec2>& points, const glm::vec4& color);
+        static void DrawPolygonLine(const std::vector<glm::vec2>& points, const glm::vec4& color, float thickness = 1.0f);
         static std::vector<glm::vec2> CreateRegularPolygonPoints(const glm::vec2& position, const glm::vec2& size, uint32_t sideCount,float rotationDeg);
     };
 
