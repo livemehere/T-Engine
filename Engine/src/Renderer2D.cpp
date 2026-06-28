@@ -349,6 +349,47 @@ namespace Engine {
         DrawLine(p1, p2, color, thickness);
         DrawLine(p2, p3, color, thickness);
         DrawLine(p3, p1, color, thickness);
+
+        const auto cross = [](const glm::vec2& a, const glm::vec2& b) {
+            return a.x * b.y - a.y * b.x;
+        };
+
+        const auto fillJoin = [&](const glm::vec2& prev, const glm::vec2& current, const glm::vec2& next) {
+            const glm::vec2 prevDelta = current - prev;
+            const glm::vec2 nextDelta = next - current;
+            const float prevLength = glm::length(prevDelta);
+            const float nextLength = glm::length(nextDelta);
+            if (prevLength <= 0.0f || nextLength <= 0.0f) {
+                return;
+            }
+
+            const glm::vec2 prevDir = prevDelta / prevLength;
+            const glm::vec2 nextDir = nextDelta / nextLength;
+            const glm::vec2 prevNormal = glm::vec2(-prevDir.y, prevDir.x) * thickness * 0.5f;
+            const glm::vec2 nextNormal = glm::vec2(-nextDir.y, nextDir.x) * thickness * 0.5f;
+
+            const auto drawMiterSide = [&](const glm::vec2& normalA, const glm::vec2& normalB) {
+                const glm::vec2 lineA = current + normalA;
+                const glm::vec2 lineB = current + normalB;
+                const float denominator = cross(prevDir, nextDir);
+                if (glm::abs(denominator) <= 0.0001f) {
+                    DrawTriangle(current, lineA, lineB, color);
+                    return;
+                }
+
+                const float t = cross(lineB - lineA, nextDir) / denominator;
+                const glm::vec2 miter = lineA + prevDir * t;
+                DrawTriangle(current, lineA, miter, color);
+                DrawTriangle(current, miter, lineB, color);
+            };
+
+            drawMiterSide(prevNormal, nextNormal);
+            drawMiterSide(-prevNormal, -nextNormal);
+        };
+
+        fillJoin(p3, p1, p2);
+        fillJoin(p1, p2, p3);
+        fillJoin(p2, p3, p1);
     }
 
     void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec4 &color, float thickness) {

@@ -10,6 +10,7 @@ namespace Engine {
             unsigned int drawCalls = 0;
             unsigned int quadCount = 0;
         };
+
         static void ResetStats();
         static Statistics GetStats();
 
