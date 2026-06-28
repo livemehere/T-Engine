@@ -321,7 +321,13 @@ namespace Engine {
             return;
         }
 
-        DrawCircle(position, size, color, thickness, fade, rotationDeg);
+        const float radius = glm::min(size.x, size.y) * 0.5f;
+        if (radius <= 0.0f) {
+            return;
+        }
+
+        const float normalizedThickness = thickness / radius;
+        DrawCircle(position, size, color, normalizedThickness, fade, rotationDeg);
     }
 
     void Renderer2D::StartBatch() {
