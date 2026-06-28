@@ -346,20 +346,9 @@ namespace Engine {
             return;
         }
 
-        const glm::vec2 points[3] = {p1, p2, p3};
-        for (size_t i = 0; i < 3; i++) {
-            const glm::vec2 start = points[i];
-            const glm::vec2 end = points[(i + 1) % 3];
-            const glm::vec2 delta = end - start;
-            const float length = glm::length(delta);
-            if (length <= 0.0f) {
-                continue;
-            }
-
-            const glm::vec2 direction = delta / length;
-            const glm::vec2 extension = direction * thickness * 0.5f;
-            DrawLine(start - extension, end + extension, color, thickness);
-        }
+        DrawLine(p1, p2, color, thickness);
+        DrawLine(p2, p3, color, thickness);
+        DrawLine(p3, p1, color, thickness);
     }
 
     void Renderer2D::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec4 &color, float thickness) {
